@@ -23,7 +23,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(onFinished: () -> Unit) {
     val scale = remember { Animatable(0.8f) }
-    var alpha = remember { Animatable(0f) }
+    val alpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
         alpha.animateTo(1f, tween(600))

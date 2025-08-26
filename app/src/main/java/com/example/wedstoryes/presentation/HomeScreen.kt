@@ -1,12 +1,8 @@
 package com.example.wedstoryes.presentation
 
-import android.net.Uri
 import android.os.Build
-import android.widget.Button
-import android.widget.FrameLayout
 import androidx.annotation.OptIn
 import androidx.annotation.RawRes
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -47,7 +44,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.example.wedstoryes.R
-import androidx.core.net.toUri
 
 @Composable
 fun HomeScreen(getStarted: () -> Unit) {

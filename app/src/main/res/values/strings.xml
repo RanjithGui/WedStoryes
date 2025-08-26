@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">WedStoryes</string>
+    <string name="title_activity_splash">SplashActivity</string>
+</resources>

@@ -44,6 +44,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.example.wedstoryes.R
+import com.example.wedstoryes.customcomposables.CustomVideoPlayer
 
 @Composable
 fun HomeScreen(getStarted: () -> Unit) {
@@ -66,7 +67,7 @@ fun HomeScreen(getStarted: () -> Unit) {
 
     Box(modifier = Modifier.fillMaxSize().background(color = colorResource(R.color.teal_200)) ){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ExoVideoBackground(videoRes = R.raw.video_background)
+            CustomVideoPlayer(videoRes = R.raw.video_background)
         }
         Column (modifier = Modifier
             .fillMaxSize().padding(16.dp)){
@@ -123,29 +124,4 @@ fun HomeScreen(getStarted: () -> Unit) {
 }
 
 
-@OptIn(UnstableApi::class)
-@Composable
-fun ExoVideoBackground(@RawRes videoRes: Int) {
-    val context = LocalContext.current
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            val uri = "android.resource://${context.packageName}/$videoRes".toUri()
-            setMediaItem(MediaItem.fromUri(uri))
-            repeatMode = Player.REPEAT_MODE_ALL
-            prepare()
-            playWhenReady = true
-            volume = 0f
-        }
-    }
 
-    AndroidView(
-        factory = {
-            PlayerView(context).apply {
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM // fills screen
-                player = exoPlayer
-            }
-        },
-        modifier = Modifier.fillMaxSize()
-    )
-}

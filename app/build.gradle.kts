@@ -1,10 +1,12 @@
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    id("com.google.dagger.hilt.android") version "2.57.1" apply false
-    kotlin("kapt")
-}
+ plugins {
+     alias(libs.plugins.android.application)
+     alias(libs.plugins.kotlin.android)
+     alias(libs.plugins.kotlin.compose)
+ }
+
+ kotlin {
+     jvmToolchain(17) // Or your desired JDK version, e.g., 8, 11, 17
+ }
 
 android {
     namespace = "com.example.wedstoryes"
@@ -29,18 +31,19 @@ android {
             )
         }
     }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
+
     buildFeatures {
         compose = true
     }
 }
+
 
 dependencies {
 
@@ -66,13 +69,13 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-    kapt(libs.androidx.hilt.compiler)
     implementation(libs.accompanist.insets)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
-    implementation(libs.coil.compose.v240)
+
+
+
+
 
 
 

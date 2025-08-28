@@ -13,6 +13,9 @@ import com.example.wedstoryes.presentation.EventType
 import com.example.wedstoryes.presentation.HomeScreen
 import com.example.wedstoryes.presentation.SplashScreen
 
+
+
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().setKeepOnScreenCondition { false }

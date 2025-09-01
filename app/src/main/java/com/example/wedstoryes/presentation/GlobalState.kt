@@ -1,3 +1,9 @@
 package com.example.wedstoryes.presentation
 
-data class GlobalState( val isLoding: Boolean = false)
+import com.example.wedstoryes.data.EventItem
+
+data class GlobalState(
+    val isLoding: Boolean = false,
+    val events : List<EventItem> = emptyList(),
+    val selectedEventItemIndex: Int = -1
+)

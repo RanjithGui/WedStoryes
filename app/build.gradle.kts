@@ -72,6 +72,8 @@ dependencies {
     implementation(libs.accompanist.insets)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
+   /* implementation(libs.hilt.android)
+    ksp("com.google.dagger:hilt-compiler:2.51.1")*/
 
 
 

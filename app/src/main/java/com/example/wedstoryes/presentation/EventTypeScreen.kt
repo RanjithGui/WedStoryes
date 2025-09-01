@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -39,33 +40,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.wedstoryes.R
+import com.example.wedstoryes.customcomposables.CustomAlertDialog
 import com.example.wedstoryes.customcomposables.CustomVideoPlayer
 import com.example.wedstoryes.data.EventItem
+import com.example.wedstoryes.presentation.events.GlobalEvent
 
 @Composable
-fun EventType() {
+fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit) {
     val gridState = rememberLazyGridState()
-    val localContext = LocalContext.current
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var openAlertDialog by remember { mutableStateOf(false) }
+    val state : GlobalState by viewmodel.state.collectAsStateWithLifecycle()
+    var selectedIndex = state.selectedEventItemIndex
+
     Column {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
-            Image(painter = painterResource(R.drawable.back_button),contentDescription = null, modifier = Modifier.padding(top =54.dp, start = 24.dp))
+            Image(painter = painterResource(R.drawable.back_button),contentDescription = null, modifier = Modifier.padding(top =54.dp, start = 24.dp).size(24.dp))
         }
       Column(
           modifier = Modifier
               .fillMaxSize()
       ) {
-          val data = remember {
-              listOf(
-                  EventItem("wedding", "Wedding", R.raw.wedding),
-                  EventItem("baby_shower", "Baby Shower", R.raw.babyshower),
-                  EventItem("corporate", "Corporate", R.raw.corporate),
-                  EventItem("birthday", "Birthday Party", R.raw.birthday),
-                  EventItem("customevent", "Custom Event", R.raw.customevent),
-              )
-          }
-
+          val data = state.events
           Box(modifier = Modifier.weight(1f)) {
               LazyVerticalGrid(
                   columns = GridCells.Fixed(2),
@@ -84,8 +81,9 @@ fun EventType() {
                           onClick = {
                               selectedIndex = index
                               if (item.id.equals("customevent")){
-                                  Toast.makeText(localContext, "Custom Event Selected", Toast.LENGTH_SHORT).show()
+                                  openAlertDialog = true
                               }
+                              onEvent.invoke(GlobalEvent.onProceedEvent(index))
                           }
                       )
                   }
@@ -107,11 +105,18 @@ fun EventType() {
           }
       }
         }
-
-
+    if (openAlertDialog) {
+       CustomAlertDialog(openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {onEvent.invoke(
+           GlobalEvent.onCustomEvent(EventItem(
+               id = it,
+               title = it,
+               videoUri = R.raw.customevent
+           )))
+       selectedIndex =state.events.indexOfFirst { true } })
     }
+}
 @Composable
-fun Lazyitem(categoryName: String, @RawRes videoRes: Int,onClick: () ->Unit = {},isSelected: Boolean=false) {
+fun Lazyitem(categoryName: String, @RawRes videoRes: Int, onClick: () ->Unit = {}, isSelected: Boolean=false) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         ElevatedCard(modifier = Modifier.fillMaxSize().padding(5.dp).clickable{onClick()}.then(if (isSelected)  Modifier.border(2.dp, colorResource(R.color.wedstoreys), RoundedCornerShape(5.dp))
         else Modifier), shape = RoundedCornerShape(5.dp)) {

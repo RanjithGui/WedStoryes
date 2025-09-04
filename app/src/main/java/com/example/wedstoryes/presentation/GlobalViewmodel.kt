@@ -12,11 +12,11 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
     init {
         updateEvents(events = listOf(
-            EventItem("wedding", "Wedding", R.raw.wedding),
-            EventItem("baby_shower", "Baby Shower", R.raw.babyshower),
-            EventItem("corporate", "Corporate", R.raw.corporate),
-            EventItem("birthday", "Birthday Party", R.raw.birthday),
-            EventItem("customevent", "Custom Event", R.raw.customevent),
+            EventItem("wedding", "Wedding", R.drawable.wedding),
+            EventItem("baby_shower", "Baby Shower", R.drawable.babyshower),
+            EventItem("corporate", "Corporate", R.drawable.corporate),
+            EventItem("birthday", "Birthday Party", R.drawable.birthday),
+            EventItem("customevent", "Custom Event", R.drawable.customevent),
         ))
     }
 
@@ -30,10 +30,21 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                 events.add(events.size -1 ,event.eventItem)
               updateEvents(events)
                 updateState { it.copy(selectedEventItemIndex = events.size-2) }
+                updateSelectedEventItem(state.value.events[state.value.selectedEventItemIndex])
             }
+            is GlobalEvent.onDeleteEvent -> {
+                val events = state.value.events.toMutableList()
+                events.remove(event.eventItem)
+                updateEvents(events)
+                updateState { it.copy(selectedEventItemIndex = -1) }
+            }
+
 
             else -> {}
         }
+    }
+    fun updateSelectedEventItem(eventItem: EventItem?) {
+        updateState { it.copy(selectedEventItem = eventItem) }
     }
     fun updateEvents(events: List<EventItem>) {
        updateState { it.copy(events =  events) }

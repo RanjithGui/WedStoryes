@@ -9,10 +9,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.wedstoryes.navigation.Route
+import com.example.wedstoryes.presentation.EventDetailsScreen
 import com.example.wedstoryes.presentation.EventType
 import com.example.wedstoryes.presentation.GlobalViewmodel
 import com.example.wedstoryes.presentation.HomeScreen
 import com.example.wedstoryes.presentation.SplashScreen
+import com.example.wedstoryes.ui.theme.WedStoryesTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,27 +22,38 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         setContent {
-
-            val nav = rememberNavController()
-           val viewmodel: GlobalViewmodel = androidx.lifecycle.viewmodel.compose.viewModel()
-            NavHost(navController = nav, startDestination = Route.Splash.value) {
-                composable(Route.Splash.value) {
-                    SplashScreen(
-                        onFinished = {
-                            nav.navigate(Route.Welcome.value) {
-                                popUpTo(Route.Splash.value) { inclusive = true }
+            WedStoryesTheme {
+                val nav = rememberNavController()
+                val viewmodel: GlobalViewmodel = androidx.lifecycle.viewmodel.compose.viewModel()
+                NavHost(navController = nav, startDestination = Route.Splash.value) {
+                    composable(Route.Splash.value) {
+                        SplashScreen(
+                            onFinished = {
+                                nav.navigate(Route.Welcome.value) {
+                                    popUpTo(Route.Splash.value) { inclusive = true }
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+                    composable(Route.Welcome.value) {
+                        HomeScreen(getStarted = {
+                            nav.navigate(Route.Gallery.value)
+                        })
+                    }
+
+                    composable(Route.Gallery.value) {
+                        EventType(viewmodel, viewmodel::onEvent, navController = nav, onProceed = {
+                            nav.navigate(Route.EventDetails.value)
+                        })
+                    }
+
+                    composable(Route.EventDetails.value) {
+                        EventDetailsScreen(viewmodel, viewmodel::onEvent, navController = nav)
+                    }
                 }
-                composable(Route.Welcome.value) { HomeScreen(getStarted = {
-                    nav.navigate(Route.Gallery.value)
-                }) }
-
-                composable(Route.Gallery.value) { EventType(viewmodel,viewmodel::onEvent) }
+            }
         }
-    }
-}
 
+    }
 }
 

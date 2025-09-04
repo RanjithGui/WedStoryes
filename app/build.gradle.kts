@@ -74,6 +74,10 @@ dependencies {
     implementation(libs.androidx.media3.ui)
    /* implementation(libs.hilt.android)
     ksp("com.google.dagger:hilt-compiler:2.51.1")*/
+    implementation(libs.coil.compose.v260)
+    implementation(libs.coil.gif) // 👈 this is required
+
+
 
 
 

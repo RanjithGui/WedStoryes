@@ -3,12 +3,19 @@ package com.example.wedstoryes.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import com.example.wedstoryes.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -17,8 +24,8 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
+    primary = WedStoryesbase,
+    secondary = WedStoryesbase,
     tertiary = Pink40
 
     /* Other default colors to override
@@ -31,6 +38,9 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+val LocalTextFieldColors = staticCompositionLocalOf<TextFieldColors> {
+    error("No TextFieldColors provided")
+}
 
 @Composable
 fun WedStoryesTheme(
@@ -48,10 +58,21 @@ fun WedStoryesTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = colorResource(R.color.wedstoreys),
+        unfocusedBorderColor = Color.Gray,
+        focusedLabelColor = colorResource(R.color.wedstoreys),
+        unfocusedLabelColor = Color.DarkGray,
+        cursorColor = colorResource(R.color.wedstoreys)
     )
+
+    CompositionLocalProvider(
+        LocalTextFieldColors provides textFieldColors
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

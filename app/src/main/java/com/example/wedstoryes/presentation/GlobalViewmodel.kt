@@ -1,8 +1,14 @@
 package com.example.wedstoryes.presentation
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import com.example.wedstoryes.BaseViewModel
 import com.example.wedstoryes.R
+import com.example.wedstoryes.data.Addons
+import com.example.wedstoryes.data.EventDetails
 import com.example.wedstoryes.data.EventItem
+import com.example.wedstoryes.data.Photographers
+import com.example.wedstoryes.data.Videographers
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
 
@@ -38,6 +44,16 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                 updateEvents(events)
                 updateState { it.copy(selectedEventItemIndex = -1) }
             }
+            is GlobalEvent.onAddEventDetails -> {
+
+                when(event.label){
+                    "Photo" ->{
+                        updatePhotographerDetails(photographers = Photographers(1,"Candid","10000","Expert in wedding photography with 10 years of experience."))}
+                    "Video" ->{}
+                    "Other" ->{}
+                    else ->{}
+                }
+            }
 
 
             else -> {}
@@ -49,4 +65,45 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
     fun updateEvents(events: List<EventItem>) {
        updateState { it.copy(events =  events) }
     }
+    fun updatePhotographerDetails(photographers: Photographers) {
+        println("Before update - eventDetails: ${state.value.eventDetails}")
+
+        val currentDetails = state.value.eventDetails
+        println("Current details: $currentDetails")
+
+        val updatedDetails = currentDetails?.copy(photographers = photographers)
+            ?: EventDetails(
+                photographers = photographers,
+                videographers = Videographers(),
+                addons = emptyList()
+            )
+
+        println("Updated details before state update: $updatedDetails")
+
+        updateState { currentState ->
+            val newState = currentState.copy(eventDetails = updatedDetails)
+            println("New state after update: $newState")
+            newState
+        }
+
+        println("Final state check: ${state.value.eventDetails}")
+    }
+    fun updateVideographerDetails(videographers: Videographers) {
+        val currentDetails = state.value.eventDetails
+        val updatedDetails = currentDetails?.copy(videographers = videographers)
+        updateState { it.copy(eventDetails = updatedDetails) }
+    }
+
+    fun updateAddonAtIndex(index: Int, newAddon: Addons) {
+            val currentDetails = state.value.eventDetails
+            currentDetails?.let { details ->
+                if (index in details.addons.indices) {
+                    val updatedAddons = details.addons.toMutableList()
+                    updatedAddons[index] = newAddon
+                    val updatedDetails = details.copy(addons = updatedAddons)
+                    updateState { it.copy(eventDetails = updatedDetails) }
+                }
+    }
+
 }
+    }

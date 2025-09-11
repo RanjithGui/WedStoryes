@@ -25,7 +25,7 @@ fun GifImage( @DrawableRes imageRes : Int,modifier: Modifier) {
         .build()
 
     AsyncImage(
-        model = imageRes, // put your GIF in res/drawable/
+        model = imageRes,
         contentDescription = null,
         imageLoader = imageLoader,
         modifier = modifier, contentScale = ContentScale.Crop

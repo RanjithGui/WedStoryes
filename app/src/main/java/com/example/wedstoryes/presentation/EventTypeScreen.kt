@@ -1,9 +1,7 @@
 package com.example.wedstoryes.presentation
 
-import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.annotation.RawRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,8 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,7 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.CustomAlertDialog
-import com.example.wedstoryes.customcomposables.CustomVideoPlayer
 import com.example.wedstoryes.customcomposables.GifImage
 import com.example.wedstoryes.data.EventItem
 import com.example.wedstoryes.presentation.events.GlobalEvent
@@ -96,12 +91,15 @@ fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navContro
                               onEvent.invoke(GlobalEvent.onProceedEvent(index))
                           },
                             onLongClick = {
-                                if (!item.id.contains("customevent")) {
+                                if (item.id.equals(item.title)) {
                                     deleteIndex =  index
+                                }else{
+                                    Toast.makeText(localContext,"You can't delete default events", Toast.LENGTH_SHORT).show()
+                                    deleteIndex = -1
                                 }
                             },
                           onDelete = {
-                              if (item.id == "customevent") {
+                              if (item.id == item.title) {
                                   onEvent.invoke(GlobalEvent.onDeleteEvent(EventItem(
                                       id = item.id,
                                       title = item.title,
@@ -155,9 +153,9 @@ fun Lazyitem(categoryName: String,
              showDelete: Boolean = false  ) {
 
     Column {
-        Box(modifier = Modifier.fillMaxWidth().padding(5.dp)) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             ElevatedCard(
-                modifier = Modifier.fillMaxSize().padding(5.dp).combinedClickable(
+                modifier = Modifier.fillMaxSize().padding(15.dp).combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick
                 ).then(
@@ -181,7 +179,7 @@ fun Lazyitem(categoryName: String,
                     shape = RoundedCornerShape(5.dp)
                 ) {
                     GifImage(
-                        imageRes = R.drawable.delete, modifier = Modifier.fillMaxSize()
+                        imageRes = R.drawable.delete, modifier = Modifier.fillMaxSize().clickable{ onDelete() }
                     )
                 }
             }
@@ -190,7 +188,7 @@ fun Lazyitem(categoryName: String,
         Text(
             text = categoryName,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(5.dp),
+            modifier = Modifier.fillMaxWidth(),
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold, color = colorResource(R.color.wedstoreys),
             fontStyle = FontStyle.Italic,

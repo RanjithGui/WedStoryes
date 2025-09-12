@@ -46,6 +46,7 @@ import androidx.navigation.NavController
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.CustomAlertDialog
 import com.example.wedstoryes.customcomposables.GifImage
+import com.example.wedstoryes.data.EventDetails
 import com.example.wedstoryes.data.EventItem
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
@@ -103,7 +104,8 @@ fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navContro
                                   onEvent.invoke(GlobalEvent.onDeleteEvent(EventItem(
                                       id = item.id,
                                       title = item.title,
-                                      videoUri = item.videoUri
+                                      videoUri = item.videoUri,
+                                      eventDetails = item.eventDetails
                                   )))
                                   deleteIndex = -1
                               }
@@ -137,7 +139,8 @@ fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navContro
            GlobalEvent.onCustomEvent(EventItem(
                id = it,
                title = it,
-               videoUri = R.drawable.customevent
+               videoUri = R.drawable.customevent,
+               eventDetails = EventDetails()
            )))
        selectedIndex =state.events.indexOfFirst { true }
        onProceed.invoke()})

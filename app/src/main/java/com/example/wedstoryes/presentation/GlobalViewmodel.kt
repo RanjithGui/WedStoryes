@@ -18,11 +18,11 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
     init {
         updateEvents(events = listOf(
-            EventItem("wedding", "Wedding", R.drawable.wedding),
-            EventItem("baby_shower", "Baby Shower", R.drawable.babyshower),
-            EventItem("corporate", "Corporate", R.drawable.corporate),
-            EventItem("birthday", "Birthday Party", R.drawable.birthday),
-            EventItem("customevent", "Custom Event", R.drawable.customevent),
+            EventItem("wedding", "Wedding", R.drawable.wedding, eventDetails = EventDetails()),
+            EventItem("baby_shower", "Baby Shower", R.drawable.babyshower,eventDetails = EventDetails()),
+            EventItem("corporate", "Corporate", R.drawable.corporate,eventDetails = EventDetails()),
+            EventItem("birthday", "Birthday Party", R.drawable.birthday,eventDetails = EventDetails()),
+            EventItem("customevent", "Custom Event", R.drawable.customevent,eventDetails = EventDetails()),
         ))
     }
 
@@ -48,7 +48,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
                 when(event.label){
                     "Photo" ->{
-                        updatePhotographerDetails(photographers = Photographers(1,"Candid","10000","Expert in wedding photography with 10 years of experience."))}
+                        updatePhotographerDetails(photographers = Photographers(1,"Candid","10000","Expert in wedding photography with 10 years of experience."),eventName = event.eventName)}
                     "Video" ->{}
                     "Other" ->{}
                     else ->{}
@@ -65,7 +65,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
     fun updateEvents(events: List<EventItem>) {
        updateState { it.copy(events =  events) }
     }
-    fun updatePhotographerDetails(photographers: Photographers) {
+    fun updatePhotographerDetails(photographers: Photographers,eventName: String) {
         println("Before update - eventDetails: ${state.value.eventDetails}")
 
         val currentDetails = state.value.eventDetails

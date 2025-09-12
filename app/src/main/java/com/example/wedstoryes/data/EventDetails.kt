@@ -1,7 +1,7 @@
 package com.example.wedstoryes.data
 
 data class EventDetails(
-    val photographers: Photographers?=null,
-    val videographers: Videographers?=null,
+    val photographers: List<Photographers>?=null,
+    val videographers: List<Videographers>?=null,
     val addons: List<Addons> = emptyList(),
 )

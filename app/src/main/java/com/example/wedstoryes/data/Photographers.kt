@@ -1,8 +1,8 @@
 package com.example.wedstoryes.data
 
 data class Photographers(
-    val nop :Int,
-    val type: String,
-    val price: String,
-    val details: String
+    val nop :Int?=null,
+    val type: String?=null,
+    val price: String?=null,
+    val details: String?=null
 )

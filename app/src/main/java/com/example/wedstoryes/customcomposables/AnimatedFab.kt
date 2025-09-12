@@ -104,9 +104,9 @@ fun AnimatedFabWithOptions(onFabOptionClick: (label: String) -> Unit = {}) {
                     )
                     FabOption(
                         icon = painterResource(R.drawable.heart_icon),
-                        label = "Others",
+                        label = "Addons",
                         onClick = {
-                            onFabOptionClick("Others")
+                            onFabOptionClick("Addons")
                             isExpanded = false
                         }
                     )
@@ -117,7 +117,7 @@ fun AnimatedFabWithOptions(onFabOptionClick: (label: String) -> Unit = {}) {
 
             FloatingActionButton(
                 onClick = { isExpanded = !isExpanded },
-                modifier = Modifier.size(85.dp).padding(16.dp),
+                modifier = Modifier.size(95.dp).padding(bottom = 45.dp, end = 45.dp),
                 containerColor = Color.White,
                 shape = RoundedCornerShape(35.dp)
             ) {

@@ -11,6 +11,7 @@ sealed class GlobalEvent {
     data class onCustomEvent(val eventItem: EventItem) : GlobalEvent()
     data class onDeleteEvent(val eventItem: EventItem) : GlobalEvent()
     data class onAddEventDetails(val label: String, val eventName: String, val photographers: Photographers,val videographers: Videographers,val addons: Addons) : GlobalEvent()
-    data class updateEventDetails(val eventDetails: EventDetails) : GlobalEvent()
+    data class updateEventDetails(val eventName: String,val index:Int,val label: String,val photographers: Photographers,val videographers: Videographers,val addons: Addons) : GlobalEvent()
+    data class removeEventDetails(val eventName: String,val index:Int,val label: String,val photographers: Photographers,val videographers: Videographers,val addons: Addons) : GlobalEvent()
 
 }

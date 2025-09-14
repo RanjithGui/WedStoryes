@@ -48,7 +48,6 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
                 when(event.label){
                     "Photo" ->{
-                       // updatePhotographerDetails(photographers = Photographers(1,"Candid","10000","Expert in wedding photography with 10 years of experience."),eventName = event.eventName, index = 0)
                         addPhotographerDetails(event.photographers,event.eventName)
                         }
                     "Video" ->{
@@ -61,6 +60,21 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     else ->{}
                 }
             }
+            is GlobalEvent.updateEventDetails -> {
+                when(event.label){
+                    "Photo" ->{
+                        updatePhotographerDetails(photographers = event.photographers,eventName = event.eventName,index = event.index)
+                    }
+                    "Video" ->{
+                        updateVideographerDetails(event.videographers,eventName = event.eventName,index = event.index)
+                    }
+                    "Addons" ->{
+                        updateAddonAtIndex(event.index,event.addons, eventName = event.eventName)
+                    }
+                    else ->{}
+                }
+            }
+            is GlobalEvent.removeEventDetails -> {}
 
 
             else -> {}
@@ -81,9 +95,11 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             videographers = emptyList(),
             addons = emptyList()
         )
+        val events = state.value.events.toMutableList()
         updateState { it.copy(eventDetails = updatedDetails) }
+        updateState { it.copy(events = ) }
     }
-    fun addVideographerDetails(videographers: Videographers) {
+    fun addVideographerDetails(videographers: Videographers,eventName: String) {
         val currentDetails = state.value.eventDetails
         val updatedDetails = currentDetails?.copy(
             videographers = currentDetails.videographers?.plus(videographers)
@@ -94,7 +110,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         )
         updateState { it.copy(eventDetails = updatedDetails) }
     }
-    fun addAddonDetails(addons: Addons) {
+    fun addAddonDetails(addons: Addons,eventName: String) {
         val currentDetails = state.value.eventDetails
         val updatedDetails = currentDetails?.addons?.plus(addons)?.let {
             currentDetails.copy(
@@ -107,34 +123,32 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         )
         updateState { it.copy(eventDetails = updatedDetails) }
     }
-    fun updatePhotographerDetails(photographers: Photographers,eventName: String,index: Int) {
-        println("Before update - eventDetails: ${state.value.eventDetails}")
+    fun updatePhotographerDetails(photographers: Photographers, eventName: String, index: Int) {
+        val currentDetails = state.value.eventDetails ?: return
 
-        val currentDetails = state.value.eventDetails
-        println("Current details: $currentDetails")
+        val updatedPhotographers = currentDetails.photographers?.toMutableList() ?: mutableListOf()
 
-        val updatedDetails = currentDetails?.photographers?.get(index)
-            ?.copy( photographers.nop,photographers.type, photographers.price, photographers.details)
-            ?: EventDetails(
-                photographers = emptyList(),
-                videographers = emptyList(),
-                addons = emptyList()
-            )
-        println("Updated details before state update: $updatedDetails")
-        updateState { currentState ->
-            val newState = currentState.copy(eventDetails = updatedDetails as EventDetails?)
-            println("New state after update: $newState")
-            newState
+        if (index >= 0 && index < updatedPhotographers.size) {
+            updatedPhotographers[index] = photographers
+
+            val updatedEventDetails = currentDetails.copy(photographers = updatedPhotographers)
+
+            updateState { currentState ->
+                currentState.copy(eventDetails = updatedEventDetails)
+            }
+
+            println("Successfully updated photographer at index $index")
+        } else {
+            println("Invalid index: $index for photographers list of size ${updatedPhotographers.size}")
         }
-        println("Final state check: ${state.value.eventDetails}")
     }
-    fun updateVideographerDetails(videographers: Videographers) {
+    fun updateVideographerDetails(videographers: Videographers,eventName: String,index: Int) {
         val currentDetails = state.value.eventDetails
      //   val updatedDetails = currentDetails?.copy(videographers = videographers)
       //  updateState { it.copy(eventDetails = updatedDetails) }
     }
 
-    fun updateAddonAtIndex(index: Int, newAddon: Addons) {
+    fun updateAddonAtIndex(index: Int, newAddon: Addons,eventName: String) {
             val currentDetails = state.value.eventDetails
             currentDetails?.let { details ->
                 if (index in details.addons.indices) {

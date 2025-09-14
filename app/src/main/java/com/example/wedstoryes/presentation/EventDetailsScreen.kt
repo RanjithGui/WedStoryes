@@ -1,8 +1,6 @@
 package com.example.wedstoryes.presentation
 
-import android.graphics.drawable.Icon
 import android.util.Log
-import android.widget.EditText
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -10,32 +8,29 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -66,19 +61,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.AnimatedFabWithOptions
-import com.example.wedstoryes.customcomposables.GifImage
 import com.example.wedstoryes.data.Addons
-import com.example.wedstoryes.data.EventItem
 import com.example.wedstoryes.data.Photographers
 import com.example.wedstoryes.data.Videographers
 import com.example.wedstoryes.presentation.events.GlobalEvent
-import kotlin.collections.emptyList
 
 @Composable
 fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController) {
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
     val localContext = LocalContext.current
-
+    Log.d("EventDetailsScreen", "Selected Event Item: ${state.eventDetails}")
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -117,39 +109,120 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                 ) {
                     state.eventDetails?.photographers?.let { photographers ->
                         if (photographers.isNotEmpty()) {
-                            items(photographers) { photographer ->
+                            itemsIndexed(photographers) {index, photographer ->
                                 EventDetailsItem(
                                     label = "Photo",
                                     onEvent,
+                                    index = index,
                                     photographer = photographer,
                                     videographer = Videographers(),
-                                    addons = Addons()
+                                    addons = Addons(),
+                                    onSave = { photographers1: Photographers?, videographers: Videographers?, addons: Addons? ->
+                                        photographers1?.let {
+                                            onEvent.invoke(GlobalEvent.updateEventDetails(
+                                                eventName = state.selectedEventItem?.title ?: "",
+                                                index = index,
+                                                label = "Photo",
+                                                photographers = it,
+                                                videographers = Videographers(),
+                                                addons = Addons()
+                                            ))
+                                        }
+                                        Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onDelete={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                                        photographers1?.let {
+                                            onEvent.invoke(GlobalEvent.removeEventDetails(
+                                                eventName = state.selectedEventItem?.title ?: "",
+                                                index = index,
+                                                label = "Photo",
+                                                photographers = it,
+                                                videographers = Videographers(),
+                                                addons = Addons()
+                                            ))
+                                        }
+                                        Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
+                                    }
                                 )
                             }
                         }
                     }
                     state.eventDetails?.videographers?.let { videographers ->
                         if (videographers.isNotEmpty()) {
-                            items(videographers) { videographer ->
+                            itemsIndexed(videographers) { index,videographer ->
                                 EventDetailsItem(
                                     label = "Video",
                                     onEvent,
+                                    index = index,
                                     photographer = Photographers(),
                                     videographer = videographer,
-                                    addons = Addons()
+                                    addons = Addons(),
+                                    onSave = { photographers1: Photographers?, videographers1: Videographers?, addons: Addons? ->
+                                        videographers1?.let {
+                                            onEvent.invoke(GlobalEvent.updateEventDetails(
+                                                eventName = state.selectedEventItem?.title ?: "",
+                                                index = index,
+                                                label = "Video",
+                                                photographers = Photographers(),
+                                                videographers = it,
+                                                addons = Addons()
+                                            ))
+                                        }
+                                        Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onDelete ={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                                        videographers1?.let {
+                                            onEvent.invoke(GlobalEvent.removeEventDetails(
+                                                eventName = state.selectedEventItem?.title ?: "",
+                                                index = 0,
+                                                label = "Video",
+                                                photographers = Photographers(),
+                                                videographers = it,
+                                                addons = Addons()
+                                            ))
+                                        }
+                                        Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
+                                    }
                                 )
                             }
                         }
                     }
                     state.eventDetails?.addons?.let { addons ->
                         if (addons.isNotEmpty()) {
-                            items(addons) { addon ->
+                            itemsIndexed(addons) {index, addon ->
                                 EventDetailsItem(
                                     label = "Addons",
                                     onEvent,
+                                    index = index,
                                     photographer = Photographers(),
                                     videographer = Videographers(),
-                                    addons = addon
+                                    addons = addon,
+                                    onSave ={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                                        addons1?.let {
+                                            onEvent.invoke(GlobalEvent.updateEventDetails(
+                                                eventName = state.selectedEventItem?.title ?: "",
+                                                index = 0,
+                                                label = "Addons",
+                                                photographers = Photographers(),
+                                                videographers = Videographers(),
+                                                addons = it
+                                            ))
+                                        }
+                                        Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onDelete={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                                        addons1?.let {
+                                            onEvent.invoke(GlobalEvent.removeEventDetails(
+                                                eventName = state.selectedEventItem?.title ?: "",
+                                                index = 0,
+                                                label = "Addons",
+                                                photographers = Photographers(),
+                                                videographers = Videographers(),
+                                                addons = it
+                                            ))
+                                        }
+                                        Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
+                                    }
                                 )
                             }
                         }
@@ -211,21 +284,10 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                 Videographers(),
                                 Addons(
                                     "Select Type",
-                                    albumsNos = 0,
-                                    albumsPrice = 0.0,
-                                    drone = null,
-                                    ledScreen = null,
-                                    liveStreaming = null,
-                                    makeupArtist = null,
-                                    decorations = null,
-                                    invitations = null,
-                                    ledScreenPrice = null,
-                                    ledScreenCount = null,
-                                    dronePrice = null,
-                                    liveStreamingPrice = null,
-                                    makeupArtistPrice = null,
-                                    decorationsPrice = null,
-                                    invitationsPrice = null
+                                    0,
+                                    "",
+                                    details = ""
+
                                 )
                             )
                         )
@@ -236,11 +298,20 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
     }
 }
 @Composable
-fun EventDetailsItem(label: String,onEvent: (GlobalEvent)-> Unit,photographer: Photographers,videographer: Videographers,addons: Addons) {
+fun EventDetailsItem(
+    label: String,
+    onEvent: (GlobalEvent) -> Unit,
+    photographer: Photographers,
+    videographer: Videographers,
+    addons: Addons,
+    index:Int,
+    onSave: (Photographers?, Videographers?, Addons?) -> Unit,
+    onDelete: (Photographers?, Videographers?, Addons?) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Select Type") }
-    val pvOptions = listOf("Select Type","Traditional", "Candid")
-    val otherOptions = listOf("Select Type","Drone", "Albums","Led Screen","Live Streaming","Makeup Artist","Decorations","Invitations")
+    val pvOptions = listOf("Traditional", "Candid")
+    val otherOptions = listOf("Drone", "Albums","Led Screen","Live Streaming","Makeup Artist","Decorations","Invitations")
     var count by remember { mutableStateOf(0) }
     var priceText by remember { mutableStateOf("") }
 
@@ -269,20 +340,26 @@ fun EventDetailsItem(label: String,onEvent: (GlobalEvent)-> Unit,photographer: P
                     ) {
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = selectedOption,
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Start,
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = colorResource(R.color.wedstoreys),
-                                    fontStyle = FontStyle.Italic)
-                                )
-                            Image(
-                                painter = if (expanded) painterResource(R.drawable.uparrow) else painterResource(R.drawable.arrowdown),
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp).align(Alignment.CenterVertically) // Optional: set a specific size
-                            )
+                                text = when(label){
+                                    "Photo" -> if (photographer.type?.isNotEmpty() == true) photographer.type else selectedOption
+                                    "Video" -> if (videographer.type?.isNotEmpty() == true) videographer.type else selectedOption
+                                    "Addons" -> if (addons.type?.isNotEmpty() ==true ) addons.type else selectedOption
+                                    else -> {}
+                                }.toString(),
+                                    modifier = Modifier.weight(1f),
+                                    textAlign = TextAlign.Start,
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = colorResource(R.color.wedstoreys),
+                                        fontStyle = FontStyle.Italic)
+                                        )
+                                        Image(
+                                            painter = if (expanded) painterResource(R.drawable.uparrow) else painterResource(R.drawable.arrowdown),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp).align(Alignment.CenterVertically) // Optional: set a specific size
+                                        )
+                                }
                         }
 
                     }
@@ -296,7 +373,7 @@ fun EventDetailsItem(label: String,onEvent: (GlobalEvent)-> Unit,photographer: P
                         when(label){
                             "Photo" -> options = pvOptions
                             "Video" -> options =pvOptions
-                            "Addons" -> options =otherOptions
+                            "Add-ons" -> options =otherOptions
                         }
                         options.forEach { option ->
                             DropdownMenuItem(
@@ -317,7 +394,12 @@ fun EventDetailsItem(label: String,onEvent: (GlobalEvent)-> Unit,photographer: P
                 OutlinedTextField(
                     modifier = Modifier.weight(5f).padding(vertical = 4.dp),
                     shape = RoundedCornerShape(35.dp),
-                    value = displayPrice,
+                    value = when(label){
+                        "Photo" -> if (photographer.price?.isNotEmpty() == true) photographer.price else displayPrice
+                        "Video" -> if (videographer.price?.isNotEmpty() == true) videographer.price else displayPrice
+                        "Addons" -> if (addons.price?.isNotEmpty() == true) addons.price else displayPrice
+                        else -> {}
+                    }.toString(),
                     onValueChange = { newValue ->
 
                         val digitsOnly = newValue.filter { it.isDigit() }
@@ -329,6 +411,7 @@ fun EventDetailsItem(label: String,onEvent: (GlobalEvent)-> Unit,photographer: P
                             } else {
                                 ""
                             }
+                            priceText =displayPrice
                         }
                     },
                     label = { Text("Price") },
@@ -353,7 +436,13 @@ fun EventDetailsItem(label: String,onEvent: (GlobalEvent)-> Unit,photographer: P
                     )
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                CounterButtons(count, onValueChange = {
+                CounterButtons(
+                    when(label){
+                        "Photo" -> if (photographer.nop != null && photographer.nop != 0) photographer.nop else count
+                        "Video" -> if (videographer.nop != null && videographer.nop != 0) videographer.nop else count
+                        "Addons" -> if (addons.count != null && addons.count != 0) addons.count else count
+                        else -> {}
+                    } as Int, onValueChange = {
                     count = it
                 },
                     modifier = Modifier
@@ -365,11 +454,67 @@ fun EventDetailsItem(label: String,onEvent: (GlobalEvent)-> Unit,photographer: P
                 )
 
             }
+            Row (modifier = Modifier.fillMaxWidth().padding(end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.End){
+                OutlinedButton(
+                    onClick = {
+                    // onDelete()
+                    },
+                    enabled =true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedButton(
+                    onClick = {
+                        val updatedPhotographer = if (label == "Photo") {
+                            photographer.copy(
+                                type = selectedOption,
+                                nop = count,
+                                price = priceText
+                            )
+                        } else null
+
+                        val updatedVideographer = if (label == "Video") {
+                            videographer.copy(
+                                type = selectedOption,
+                                nop = count,
+                                price = priceText
+                            )
+                        } else null
+
+                        val updatedAddon = if (label == "Addons") {
+                            addons.copy(
+                                type = selectedOption,
+                                count=count,
+                               price = priceText, details = ""
+                            )
+                        } else null
+
+                        onSave(updatedPhotographer, updatedVideographer, updatedAddon)
+                    },
+                    enabled =true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
 
             // Add your other content here
         }
     }
-}
 fun formatNumberWithCommas(number: String): String {
     if (number.isEmpty()) return ""
     return try {

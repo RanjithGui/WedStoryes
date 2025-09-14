@@ -97,7 +97,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         )
         val events = state.value.events.toMutableList()
         updateState { it.copy(eventDetails = updatedDetails) }
-        updateState { it.copy(events = ) }
+       // updateState { it.copy(events = ) }
     }
     fun addVideographerDetails(videographers: Videographers,eventName: String) {
         val currentDetails = state.value.eventDetails

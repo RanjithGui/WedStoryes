@@ -62,6 +62,7 @@ import androidx.navigation.NavController
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.AnimatedFabWithOptions
 import com.example.wedstoryes.data.Addons
+import com.example.wedstoryes.data.EventDetails
 import com.example.wedstoryes.data.Photographers
 import com.example.wedstoryes.data.Videographers
 import com.example.wedstoryes.presentation.events.GlobalEvent
@@ -71,6 +72,9 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
     val localContext = LocalContext.current
     Log.d("EventDetailsScreen", "Selected Event Item: ${state.eventDetails}")
+    val eventDetails = state.events.find { eventItem ->
+        eventItem.title == state.selectedEventItem?.title
+    }?.eventDetails
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -99,7 +103,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                 )
             }
 
-            if (state.eventDetails != null) {
+            if (eventDetails != null) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -107,7 +111,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                         .padding(bottom = 90.dp),
                     contentPadding = PaddingValues(top = 5.dp, bottom = 5.dp)
                 ) {
-                    state.eventDetails?.photographers?.let { photographers ->
+                    eventDetails.photographers?.let { photographers ->
                         if (photographers.isNotEmpty()) {
                             itemsIndexed(photographers) {index, photographer ->
                                 EventDetailsItem(
@@ -147,7 +151,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                             }
                         }
                     }
-                    state.eventDetails?.videographers?.let { videographers ->
+                    eventDetails.videographers?.let { videographers ->
                         if (videographers.isNotEmpty()) {
                             itemsIndexed(videographers) { index,videographer ->
                                 EventDetailsItem(
@@ -187,7 +191,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                             }
                         }
                     }
-                    state.eventDetails?.addons?.let { addons ->
+                    eventDetails.addons.let { addons ->
                         if (addons.isNotEmpty()) {
                             itemsIndexed(addons) {index, addon ->
                                 EventDetailsItem(
@@ -309,10 +313,29 @@ fun EventDetailsItem(
     onDelete: (Photographers?, Videographers?, Addons?) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("Select Type") }
+    var selectedOption by remember {
+        mutableStateOf(
+            when(label) {
+                "Photo" -> photographer.type?.takeIf { it.isNotEmpty() } ?: "Select Type"
+                "Video" -> videographer.type?.takeIf { it.isNotEmpty() } ?: "Select Type"
+                "Addons" -> addons.type?.takeIf { it.isNotEmpty() } ?: "Select Type"
+                else -> "Select Type"
+            }
+        )
+    }
     val pvOptions = listOf("Traditional", "Candid")
     val otherOptions = listOf("Drone", "Albums","Led Screen","Live Streaming","Makeup Artist","Decorations","Invitations")
-    var count by remember { mutableStateOf(0) }
+    var count by remember {
+        mutableStateOf(
+            when(label) {
+                "Photo" -> photographer.nop?.takeIf { it != 0 } ?: 0
+                "Video" -> videographer.nop?.takeIf { it != 0 } ?: 0
+                "Addons" -> addons.count.takeIf { it != 0 } ?: 0
+                else -> 0
+            }
+        )
+    }
+
     var priceText by remember { mutableStateOf("") }
 
 
@@ -340,12 +363,7 @@ fun EventDetailsItem(
                     ) {
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = when(label){
-                                    "Photo" -> if (photographer.type?.isNotEmpty() == true) photographer.type else selectedOption
-                                    "Video" -> if (videographer.type?.isNotEmpty() == true) videographer.type else selectedOption
-                                    "Addons" -> if (addons.type?.isNotEmpty() ==true ) addons.type else selectedOption
-                                    else -> {}
-                                }.toString(),
+                                text = selectedOption,
                                     modifier = Modifier.weight(1f),
                                     textAlign = TextAlign.Start,
                                     style = TextStyle(
@@ -373,7 +391,7 @@ fun EventDetailsItem(
                         when(label){
                             "Photo" -> options = pvOptions
                             "Video" -> options =pvOptions
-                            "Add-ons" -> options =otherOptions
+                            "Addons" -> options =otherOptions
                         }
                         options.forEach { option ->
                             DropdownMenuItem(
@@ -440,7 +458,7 @@ fun EventDetailsItem(
                     when(label){
                         "Photo" -> if (photographer.nop != null && photographer.nop != 0) photographer.nop else count
                         "Video" -> if (videographer.nop != null && videographer.nop != 0) videographer.nop else count
-                        "Addons" -> if (addons.count != null && addons.count != 0) addons.count else count
+                        "Addons" -> if (addons.count != 0) addons.count else count
                         else -> {}
                     } as Int, onValueChange = {
                     count = it

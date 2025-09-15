@@ -51,10 +51,10 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                         addPhotographerDetails(event.photographers,event.eventName)
                         }
                     "Video" ->{
-                        addVideographerDetails(event.videographers)
+                        addVideographerDetails(event.videographers,event.eventName)
                     }
                     "Addons" ->{
-                        addAddonDetails(event.addons)
+                        addAddonDetails(event.addons,event.eventName)
 
                     }
                     else ->{}
@@ -97,6 +97,16 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         )
         val events = state.value.events.toMutableList()
         updateState { it.copy(eventDetails = updatedDetails) }
+        val updatedEvents = events.map { eventItem ->
+            if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                eventItem.copy(eventDetails = updatedDetails)
+            } else {
+                eventItem
+            }
+        }
+        updateState { currentState ->
+            currentState.copy(events = updatedEvents)
+        }
        // updateState { it.copy(events = ) }
     }
     fun addVideographerDetails(videographers: Videographers,eventName: String) {
@@ -109,6 +119,17 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             addons = emptyList()
         )
         updateState { it.copy(eventDetails = updatedDetails) }
+        val currentEvents = state.value.events.toMutableList()
+        val updatedEvents = currentEvents.map { eventItem ->
+            if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                eventItem.copy(eventDetails = updatedDetails)
+            } else {
+                eventItem
+            }
+        }
+        updateState { currentState ->
+            currentState.copy(events = updatedEvents)
+        }
     }
     fun addAddonDetails(addons: Addons,eventName: String) {
         val currentDetails = state.value.eventDetails
@@ -122,30 +143,67 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             addons = listOf(addons)
         )
         updateState { it.copy(eventDetails = updatedDetails) }
+        val currentEvents = state.value.events.toMutableList()
+        val updatedEvents = currentEvents.map { eventItem ->
+            if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                eventItem.copy(eventDetails = updatedDetails)
+            } else {
+                eventItem
+            }
+        }
+        updateState { currentState ->
+            currentState.copy(events = updatedEvents)
+        }
     }
     fun updatePhotographerDetails(photographers: Photographers, eventName: String, index: Int) {
         val currentDetails = state.value.eventDetails ?: return
-
         val updatedPhotographers = currentDetails.photographers?.toMutableList() ?: mutableListOf()
-
         if (index >= 0 && index < updatedPhotographers.size) {
             updatedPhotographers[index] = photographers
-
             val updatedEventDetails = currentDetails.copy(photographers = updatedPhotographers)
-
             updateState { currentState ->
                 currentState.copy(eventDetails = updatedEventDetails)
             }
-
+            val currentEvents = state.value.events.toMutableList()
+            val updatedEvents = currentEvents.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = updatedEventDetails)
+                } else {
+                    eventItem
+                }
+            }
+            updateState { currentState ->
+                currentState.copy(events = updatedEvents)
+            }
             println("Successfully updated photographer at index $index")
         } else {
             println("Invalid index: $index for photographers list of size ${updatedPhotographers.size}")
         }
     }
     fun updateVideographerDetails(videographers: Videographers,eventName: String,index: Int) {
-        val currentDetails = state.value.eventDetails
-     //   val updatedDetails = currentDetails?.copy(videographers = videographers)
-      //  updateState { it.copy(eventDetails = updatedDetails) }
+        val currentDetails = state.value.eventDetails ?: return
+        val updatedVideographers = currentDetails.videographers?.toMutableList() ?: mutableListOf()
+        if (index >= 0 && index < updatedVideographers.size) {
+            updatedVideographers[index] = videographers
+            val updatedEventDetails = currentDetails.copy(videographers = updatedVideographers)
+            updateState { currentState ->
+                currentState.copy(eventDetails = updatedEventDetails)
+            }
+            val currentEvents = state.value.events.toMutableList()
+            val updatedEvents = currentEvents.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = updatedEventDetails)
+                } else {
+                    eventItem
+                }
+            }
+            updateState { currentState ->
+                currentState.copy(events = updatedEvents)
+            }
+        } else {
+            println("Invalid index: $index for videographers list of size ${updatedVideographers.size}")
+        }
+
     }
 
     fun updateAddonAtIndex(index: Int, newAddon: Addons,eventName: String) {
@@ -156,8 +214,20 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     updatedAddons[index] = newAddon
                     val updatedDetails = details.copy(addons = updatedAddons)
                     updateState { it.copy(eventDetails = updatedDetails) }
+                    val currentEvents = state.value.events.toMutableList()
+                    val updatedEvents = currentEvents.map { eventItem ->
+                        if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                            eventItem.copy(eventDetails = updatedDetails)
+                        } else {
+                            eventItem
+                        }
+                    }
+                    updateState { currentState ->
+                        currentState.copy(events = updatedEvents)
+                    }
                 }
     }
 
+   }
+
 }
-    }

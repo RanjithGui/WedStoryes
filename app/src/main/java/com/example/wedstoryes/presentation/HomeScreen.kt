@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,14 +33,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.CustomVideoPlayer
+import com.example.wedstoryes.customcomposables.VideoPlayerViewModel
 
 @Composable
 fun HomeScreen(getStarted: () -> Unit) {
     var jump by remember { mutableStateOf(false) }
     var jump2 by remember { mutableStateOf(false) }
     var jump3 by remember { mutableStateOf(false) }
+    val viewModel: VideoPlayerViewModel = viewModel()
     LaunchedEffect(Unit) {
         while (true) {
             jump = true
@@ -54,6 +58,12 @@ fun HomeScreen(getStarted: () -> Unit) {
         }
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.exoPlayer.pause()
+            viewModel.exoPlayer.clearVideoSurface()
+        }
+    }
     Box(modifier = Modifier.fillMaxSize().background(color = colorResource(R.color.teal_200)) ){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CustomVideoPlayer(videoRes = R.raw.video_background)
@@ -97,7 +107,11 @@ fun HomeScreen(getStarted: () -> Unit) {
                 .align(alignment = Alignment.CenterHorizontally), color = Color.White, textAlign = TextAlign.Center,fontWeight = FontWeight.SemiBold)
            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
                androidx.compose.material3.Button(
-                   onClick = { getStarted() },
+                   onClick = {
+                       viewModel.pauseVideo()
+                       viewModel.exoPlayer.clearVideoSurface()
+                       getStarted()
+                             },
                    modifier = Modifier
                        .padding( start = 16.dp, end = 16.dp, bottom = 32.dp).fillMaxWidth(),
                    colors = ButtonColors(containerColor = colorResource(R.color.wedstoreys),

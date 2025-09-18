@@ -79,7 +79,7 @@ fun AnimatedFabWithOptions(onFabOptionClick: (String) -> Unit = {}, eventDetails
                     animationSpec = tween(200)
                 ) + fadeOut(animationSpec = tween(200))
             ) {
-                if (eventDetails?.isEmpty() ?: false){
+                if (eventDetails != null && eventDetails.isNotEmpty()){
                     FabOption(
                         icon = painterResource(R.drawable.camera),
                         label = "Add Event",

@@ -106,7 +106,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                 }
             }
 
-            if (eventDetails != null) {
+            if (eventDetails != null && eventDetails.isNotEmpty()) {
                 eventDetails.forEachIndexed { index, details ->
                     ExpandableCard({},
                         { SubEventitem(eventDetails,onEvent,state,details.subEvent) }, isExpandedText = false)

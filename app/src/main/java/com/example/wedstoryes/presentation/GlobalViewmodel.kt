@@ -16,12 +16,11 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
     init {
         updateEvents(events = listOf(
-            EventItem("wedding", "Wedding", R.drawable.wedding, eventDetails = listOf(SubEventDetails())),
-            EventItem("baby_shower", "Baby Shower", R.drawable.babyshower, eventDetails = listOf(SubEventDetails())),
-            EventItem("corporate", "Corporate", R.drawable.corporate, eventDetails = listOf(SubEventDetails())),
-            EventItem("birthday", "Birthday Party", R.drawable.birthday, eventDetails = listOf(SubEventDetails())),
-            EventItem("customevent", "Custom Event", R.drawable.customevent, eventDetails = listOf(SubEventDetails()))
-        ))
+            EventItem("wedding", "Wedding", R.drawable.wedding, eventDetails = emptyList()),
+            EventItem("baby_shower", "Baby Shower", R.drawable.babyshower, eventDetails =  emptyList()),
+            EventItem("corporate", "Corporate", R.drawable.corporate, eventDetails =  emptyList()),
+            EventItem("birthday", "Birthday Party", R.drawable.birthday, eventDetails =  emptyList()),
+            EventItem("customevent", "Custom Event", R.drawable.customevent, eventDetails =  emptyList())))
     }
 
     override fun onEvent(event: GlobalEvent) {

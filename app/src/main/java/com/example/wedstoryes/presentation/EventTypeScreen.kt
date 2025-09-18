@@ -46,7 +46,6 @@ import androidx.navigation.NavController
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.CustomAlertDialog
 import com.example.wedstoryes.customcomposables.GifImage
-import com.example.wedstoryes.data.EventDetails
 import com.example.wedstoryes.data.EventItem
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
@@ -140,20 +139,21 @@ fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navContro
                id = it,
                title = it,
                videoUri = R.drawable.customevent,
-               eventDetails = EventDetails()
+               eventDetails = emptyList()
            )))
        selectedIndex =state.events.indexOfFirst { true }
        onProceed.invoke()})
     }
 }
 @Composable
-fun Lazyitem(categoryName: String,
-             @DrawableRes videoRes: Int,
-             onClick: () ->Unit = {},
-             isSelected: Boolean=false,
-             onLongClick: () -> Unit = {},
-             onDelete: () -> Unit = {},
-             showDelete: Boolean = false  ) {
+fun Lazyitem(
+    categoryName: String?,
+    @DrawableRes videoRes: Int?,
+    onClick: () -> Unit = {},
+    isSelected: Boolean =false,
+    onLongClick: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    showDelete: Boolean = false  ) {
 
     Column {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -188,15 +188,17 @@ fun Lazyitem(categoryName: String,
             }
 
         }
-        Text(
-            text = categoryName,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold, color = colorResource(R.color.wedstoreys),
-            fontStyle = FontStyle.Italic,
-            fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal)),
-        )
+        if (categoryName != null) {
+            Text(
+                text = categoryName,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold, color = colorResource(R.color.wedstoreys),
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal)),
+            )
+        }
     }
 
 }

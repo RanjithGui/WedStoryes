@@ -61,16 +61,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.AnimatedFabWithOptions
+import com.example.wedstoryes.customcomposables.ExpandableCard
 import com.example.wedstoryes.data.Addons
-import com.example.wedstoryes.data.EventDetails
 import com.example.wedstoryes.data.Photographers
+import com.example.wedstoryes.data.SubEventDetails
 import com.example.wedstoryes.data.Videographers
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
 @Composable
 fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController) {
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
-    val localContext = LocalContext.current
+    val subEventTitle by remember { mutableStateOf("") }
     Log.d("EventDetailsScreen", "Selected Event Item: ${state.eventDetails}")
     val eventDetails = state.events.find { eventItem ->
         eventItem.title == state.selectedEventItem?.title
@@ -88,154 +89,33 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                         .clickable { navController.popBackStack() },
                 )
 
-                Text(
-                    text = if (state.selectedEventItem != null) state.selectedEventItem!!.title else "",
-                    modifier = Modifier
-                        .padding(top = 54.dp, start = 48.dp, end = 24.dp)
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter),
-                    fontSize = 25.sp,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorResource(R.color.wedstoreys),
-                    fontStyle = FontStyle.Italic,
-                    fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal))
-                )
+                if (state.selectedEventItem != null){
+                    Text(
+                        text = state.selectedEventItem?.title.toString(),
+                        modifier = Modifier
+                            .padding(top = 54.dp, start = 48.dp, end = 24.dp)
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
+                        fontSize = 25.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorResource(R.color.wedstoreys),
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal))
+                    )
+                }
             }
 
             if (eventDetails != null) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 14.dp)
-                        .padding(bottom = 90.dp),
-                    contentPadding = PaddingValues(top = 5.dp, bottom = 5.dp)
-                ) {
-                    eventDetails.photographers?.let { photographers ->
-                        if (photographers.isNotEmpty()) {
-                            itemsIndexed(photographers) {index, photographer ->
-                                EventDetailsItem(
-                                    label = "Photo",
-                                    onEvent,
-                                    index = index,
-                                    photographer = photographer,
-                                    videographer = Videographers(),
-                                    addons = Addons(),
-                                    onSave = { photographers1: Photographers?, videographers: Videographers?, addons: Addons? ->
-                                        photographers1?.let {
-                                            onEvent.invoke(GlobalEvent.updateEventDetails(
-                                                eventName = state.selectedEventItem?.title ?: "",
-                                                index = index,
-                                                label = "Photo",
-                                                photographers = it,
-                                                videographers = Videographers(),
-                                                addons = Addons()
-                                            ))
-                                        }
-                                        Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
-                                    },
-                                    onDelete={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
-                                        photographers1?.let {
-                                            onEvent.invoke(GlobalEvent.removeEventDetails(
-                                                eventName = state.selectedEventItem?.title ?: "",
-                                                index = index,
-                                                label = "Photo",
-                                                photographers = it,
-                                                videographers = Videographers(),
-                                                addons = Addons()
-                                            ))
-                                        }
-                                        Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    eventDetails.videographers?.let { videographers ->
-                        if (videographers.isNotEmpty()) {
-                            itemsIndexed(videographers) { index,videographer ->
-                                EventDetailsItem(
-                                    label = "Video",
-                                    onEvent,
-                                    index = index,
-                                    photographer = Photographers(),
-                                    videographer = videographer,
-                                    addons = Addons(),
-                                    onSave = { photographers1: Photographers?, videographers1: Videographers?, addons: Addons? ->
-                                        videographers1?.let {
-                                            onEvent.invoke(GlobalEvent.updateEventDetails(
-                                                eventName = state.selectedEventItem?.title ?: "",
-                                                index = index,
-                                                label = "Video",
-                                                photographers = Photographers(),
-                                                videographers = it,
-                                                addons = Addons()
-                                            ))
-                                        }
-                                        Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
-                                    },
-                                    onDelete ={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
-                                        videographers1?.let {
-                                            onEvent.invoke(GlobalEvent.removeEventDetails(
-                                                eventName = state.selectedEventItem?.title ?: "",
-                                                index = 0,
-                                                label = "Video",
-                                                photographers = Photographers(),
-                                                videographers = it,
-                                                addons = Addons()
-                                            ))
-                                        }
-                                        Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    eventDetails.addons.let { addons ->
-                        if (addons.isNotEmpty()) {
-                            itemsIndexed(addons) {index, addon ->
-                                EventDetailsItem(
-                                    label = "Addons",
-                                    onEvent,
-                                    index = index,
-                                    photographer = Photographers(),
-                                    videographer = Videographers(),
-                                    addons = addon,
-                                    onSave ={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
-                                        addons1?.let {
-                                            onEvent.invoke(GlobalEvent.updateEventDetails(
-                                                eventName = state.selectedEventItem?.title ?: "",
-                                                index = 0,
-                                                label = "Addons",
-                                                photographers = Photographers(),
-                                                videographers = Videographers(),
-                                                addons = it
-                                            ))
-                                        }
-                                        Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
-                                    },
-                                    onDelete={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
-                                        addons1?.let {
-                                            onEvent.invoke(GlobalEvent.removeEventDetails(
-                                                eventName = state.selectedEventItem?.title ?: "",
-                                                index = 0,
-                                                label = "Addons",
-                                                photographers = Photographers(),
-                                                videographers = Videographers(),
-                                                addons = it
-                                            ))
-                                        }
-                                        Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            }
-                        }
-                    }
+                eventDetails.forEachIndexed { index, details ->
+                    ExpandableCard({},
+                        { SubEventitem(eventDetails,onEvent,state,details.subEvent) }, isExpandedText = false)
                 }
+
             } else {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -264,7 +144,8 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                 state.selectedEventItem?.title ?: "",
                                 Photographers(0, "Select Type", "", ""),
                                 Videographers(),
-                                Addons()
+                                Addons(),
+                                subEvent = ""
                             )
                         )
                     }
@@ -275,7 +156,8 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                 state.selectedEventItem?.title ?: "",
                                 Photographers(),
                                 Videographers(0, "Select Type", "", ""),
-                                Addons()
+                                Addons(),
+                                subEvent = ""
                             )
                         )
                     }
@@ -291,14 +173,156 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                     0,
                                     "",
                                     details = ""
-
-                                )
+                                ), subEvent =""
                             )
                         )
                     }
+                    "Add Event" ->{
+                       println("added subevent")
+                        onEvent(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),subEventTitle))
+                    }
                 }
             }
-        )
+        ,eventDetails)
+    }
+}
+@Composable()
+fun SubEventitem(eventDetails: List<SubEventDetails>, onEvent: (GlobalEvent) -> Unit, state: GlobalState, subEvent: String?){
+    val localContext = LocalContext.current
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 14.dp)
+            .padding(bottom = 90.dp),
+        contentPadding = PaddingValues(top = 5.dp, bottom = 5.dp)
+    ) {
+        val existingDetail = eventDetails.find { it.subEvent == subEvent }
+
+        if (existingDetail?.photographers?.isNotEmpty() ?: false) {
+                itemsIndexed(existingDetail.photographers) { index, photographer ->
+                    EventDetailsItem(
+                        label = "Photo",
+                        onEvent,
+                        index = index,
+                        photographer = photographer,
+                        videographer = Videographers(),
+                        addons = Addons(),
+                        onSave = { photographers1: Photographers?, videographers: Videographers?, addons: Addons? ->
+                            photographers1?.let {
+                                onEvent.invoke(GlobalEvent.updateEventDetails(
+                                    eventName = state.selectedEventItem?.title ?: "",
+                                    index = index,
+                                    label = "Photo",
+                                    photographers = it,
+                                    videographers = Videographers(),
+                                    addons = Addons(),
+                                    subEvent =subEvent
+                                ))
+                            }
+                            Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
+                        },
+                        onDelete={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                            photographers1?.let {
+                                onEvent.invoke(GlobalEvent.removeEventDetails(
+                                    eventName = state.selectedEventItem?.title ?: "",
+                                    index = index,
+                                    label = "Photo",
+                                    photographers = it,
+                                    videographers = Videographers(),
+                                    addons = Addons(),
+                                    subEvent =subEvent
+                                ))
+                            }
+                            Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
+
+
+            if (existingDetail?.videographers?.isNotEmpty() ?: false) {
+                itemsIndexed(existingDetail.videographers) { index, videographer ->
+                    EventDetailsItem(
+                        label = "Video",
+                        onEvent,
+                        index = index,
+                        photographer = Photographers(),
+                        videographer = videographer,
+                        addons = Addons(),
+                        onSave = { photographers1: Photographers?, videographers1: Videographers?, addons: Addons? ->
+                            videographers1?.let {
+                                onEvent.invoke(GlobalEvent.updateEventDetails(
+                                    eventName = state.selectedEventItem?.title ?: "",
+                                    index = index,
+                                    label = "Video",
+                                    photographers = Photographers(),
+                                    videographers = it,
+                                    addons = Addons(),
+                                    subEvent =subEvent
+                                ))
+                            }
+                            Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
+                        },
+                        onDelete ={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                            videographers1?.let {
+                                onEvent.invoke(GlobalEvent.removeEventDetails(
+                                    eventName = state.selectedEventItem?.title ?: "",
+                                    index = 0,
+                                    label = "Video",
+                                    photographers = Photographers(),
+                                    videographers = it,
+                                    addons = Addons(),
+                                    subEvent =subEvent
+                                ))
+                            }
+                            Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
+
+
+            if (existingDetail?.photographers?.isNotEmpty() ?: false) {
+                itemsIndexed(existingDetail.addons) { index, addon ->
+                    EventDetailsItem(
+                        label = "Addons",
+                        onEvent,
+                        index = index,
+                        photographer = Photographers(),
+                        videographer = Videographers(),
+                        addons = addon,
+                        onSave ={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                            addons1?.let {
+                                onEvent.invoke(GlobalEvent.updateEventDetails(
+                                    eventName = state.selectedEventItem?.title ?: "",
+                                    index = 0,
+                                    label = "Addons",
+                                    photographers = Photographers(),
+                                    videographers = Videographers(),
+                                    addons = it,
+                                    subEvent =subEvent
+                                ))
+                            }
+                            Toast.makeText(localContext, "Saved", Toast.LENGTH_SHORT).show()
+                        },
+                        onDelete={ photographers1: Photographers?, videographers1: Videographers?, addons1: Addons? ->
+                            addons1?.let {
+                                onEvent.invoke(GlobalEvent.removeEventDetails(
+                                    eventName = state.selectedEventItem?.title ?: "",
+                                    index = 0,
+                                    label = "Addons",
+                                    photographers = Photographers(),
+                                    videographers = Videographers(),
+                                    addons = it,
+                                    subEvent =subEvent
+                                ))
+                            }
+                            Toast.makeText(localContext, "Deleted", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
+
     }
 }
 @Composable

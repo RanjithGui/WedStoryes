@@ -12,7 +12,7 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 
 @Composable
-fun GifImage( @DrawableRes imageRes : Int,modifier: Modifier) {
+fun GifImage(@DrawableRes imageRes: Int?, modifier: Modifier) {
     val context = LocalContext.current
     val imageLoader = ImageLoader.Builder(context)
         .components {

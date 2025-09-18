@@ -1,8 +1,8 @@
 package com.example.wedstoryes.data
 
 data class EventItem(
-    val id: String,
-    val title: String,
-    val videoUri: Int,
-    val eventDetails: EventDetails
+    val id: String?=null,
+    val title: String?=null,
+    val videoUri: Int?=null,
+    val eventDetails: List<SubEventDetails> = emptyList()
 )

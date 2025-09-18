@@ -1,9 +1,6 @@
 package com.example.wedstoryes.customcomposables
 
-import android.graphics.drawable.Icon
-import android.media.Image
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,12 +20,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,9 +45,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.wedstoryes.R
+import com.example.wedstoryes.data.SubEventDetails
 
 @Composable
-fun AnimatedFabWithOptions(onFabOptionClick: (label: String) -> Unit = {}) {
+fun AnimatedFabWithOptions(onFabOptionClick: (String) -> Unit = {}, eventDetails: List<SubEventDetails>?) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Box(
@@ -84,32 +79,46 @@ fun AnimatedFabWithOptions(onFabOptionClick: (label: String) -> Unit = {}) {
                     animationSpec = tween(200)
                 ) + fadeOut(animationSpec = tween(200))
             ) {
-                Column(modifier = Modifier.padding(end = 16.dp),verticalArrangement = Arrangement.spacedBy(16.dp)) {
-
+                if (eventDetails?.isEmpty() ?: false){
                     FabOption(
                         icon = painterResource(R.drawable.camera),
-                        label = "Photo",
+                        label = "Add Event",
                         onClick = {
-                            onFabOptionClick("Photo")
+                            onFabOptionClick("Add Event")
                             isExpanded = false
                         }
                     )
-                    FabOption(
-                        icon = painterResource(R.drawable.outline_videocam_24),
-                        label = "Video",
-                        onClick = {
-                            onFabOptionClick("Video")
-                            isExpanded = false
-                        }
-                    )
-                    FabOption(
-                        icon = painterResource(R.drawable.heart_icon),
-                        label = "Addons",
-                        onClick = {
-                            onFabOptionClick("Addons")
-                            isExpanded = false
-                        }
-                    )
+                }else {
+                    Column(
+                        modifier = Modifier.padding(end = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+
+                        FabOption(
+                            icon = painterResource(R.drawable.camera),
+                            label = "Photo",
+                            onClick = {
+                                onFabOptionClick("Photo")
+                                isExpanded = false
+                            }
+                        )
+                        FabOption(
+                            icon = painterResource(R.drawable.outline_videocam_24),
+                            label = "Video",
+                            onClick = {
+                                onFabOptionClick("Video")
+                                isExpanded = false
+                            }
+                        )
+                        FabOption(
+                            icon = painterResource(R.drawable.heart_icon),
+                            label = "Addons",
+                            onClick = {
+                                onFabOptionClick("Addons")
+                                isExpanded = false
+                            }
+                        )
+                    }
                 }
             }
 

@@ -3,6 +3,7 @@ package com.example.wedstoryes.presentation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -61,8 +64,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.wedstoryes.R
 import com.example.wedstoryes.customcomposables.AnimatedFabWithOptions
+import com.example.wedstoryes.customcomposables.CustomAlertDialog
 import com.example.wedstoryes.customcomposables.ExpandableCard
 import com.example.wedstoryes.data.Addons
+import com.example.wedstoryes.data.EventItem
 import com.example.wedstoryes.data.Photographers
 import com.example.wedstoryes.data.SubEventDetails
 import com.example.wedstoryes.data.Videographers
@@ -71,19 +76,30 @@ import com.example.wedstoryes.presentation.events.GlobalEvent
 @Composable
 fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController) {
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
-    val subEventTitle by remember { mutableStateOf("") }
+    var openAlertDialog by remember { mutableStateOf(false) }
     Log.d("EventDetailsScreen", "Selected Event Item: ${state.eventDetails}")
     val eventDetails = state.events.find { eventItem ->
         eventItem.title == state.selectedEventItem?.title
     }?.eventDetails
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(start=24.dp, end = 24.dp)) {
+            var isFabExpanded by remember { mutableStateOf(false) }
+
+            // Handle backdrop at parent level
+            if (isFabExpanded) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Transparent)
+                        .clickable { isFabExpanded = false }
+                )
+            }
             Box(modifier = Modifier.fillMaxWidth()) {
                 Image(
                     painter = painterResource(R.drawable.back_button),
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(top = 60.dp, start = 24.dp)
+                        .padding(top = 60.dp)
                         .size(24.dp)
                         .align(Alignment.TopStart)
                         .clickable { navController.popBackStack() },
@@ -108,10 +124,23 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
 
             if (eventDetails != null && eventDetails.isNotEmpty()) {
                 eventDetails.forEachIndexed { index, details ->
-                    ExpandableCard({},
-                        { SubEventitem(eventDetails,onEvent,state,details.subEvent) }, isExpandedText = false)
+                   Column(modifier = Modifier.fillMaxWidth().padding(top=10.dp)) {
+                       ExpandableCard({
+                           Text(
+                               text = details.subEvent.toString(),
+                               modifier = Modifier
+                                   .fillMaxWidth().padding(start = 16.dp),
+                               fontSize = 25.sp,
+                               textAlign = TextAlign.Start,
+                               fontWeight = FontWeight.SemiBold,
+                               color = colorResource(R.color.wedstoreys),
+                               fontStyle = FontStyle.Italic,
+                               fontFamily = FontFamily.Cursive
+                           ) },
+                           { SubEventitem(eventDetails,onEvent,state,details.subEvent) },
+                           isExpandedText = false)
+                   }
                 }
-
             } else {
                 Column(
                     modifier = Modifier
@@ -179,11 +208,18 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                     }
                     "Add Event" ->{
                        println("added subevent")
-                        onEvent(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),subEventTitle))
+                        openAlertDialog =true
                     }
                 }
             }
-        ,eventDetails)
+        , eventDetails = eventDetails,modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp))
+        if (openAlertDialog){
+            CustomAlertDialog(openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {
+                onEvent.invoke(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),it))
+        })
+        }
     }
 }
 @Composable()

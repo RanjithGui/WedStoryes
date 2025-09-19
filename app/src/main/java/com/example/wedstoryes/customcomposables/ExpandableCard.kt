@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,13 +31,24 @@ fun ExpandableCard( headerContent: @Composable () -> Unit, itemContent: @Composa
     var isExpanded by remember { mutableStateOf(isExpandedText) }
     Column( modifier = Modifier.fillMaxWidth() .clickable { isExpanded = !isExpanded } )
     {
-        Row( modifier = Modifier .fillMaxWidth() .padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, )
-        { Icon( painter = painterResource( id = if (isExpanded) { R.drawable.uparrow } else {
-            R.drawable.arrowdown } ),
-            contentDescription = null, tint = Color.Black,
-            modifier = Modifier .padding(end = 12.dp).size(20.dp) )
-            Box(modifier = Modifier.weight(1f)) {
-                headerContent()
+
+            ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(5.dp), elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp)) {
+                Row( modifier = Modifier .fillMaxWidth() .padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, )
+                {
+                    Box(modifier = Modifier.weight(1f)) {
+                    headerContent()
+                }
+                    Icon(
+                        painter = painterResource(
+                            id = if (isExpanded) {
+                                R.drawable.uparrow
+                            } else {
+                                R.drawable.arrowdown
+                            }
+                        ),
+                        contentDescription = null, tint = Color.Black,
+                        modifier = Modifier.padding(top = 12.dp,end=24.dp).size(20.dp)
+                    )
             }
         }
         AnimatedVisibility(visible = isExpanded) {

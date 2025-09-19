@@ -10,6 +10,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,13 +49,14 @@ import com.example.wedstoryes.R
 import com.example.wedstoryes.data.SubEventDetails
 
 @Composable
-fun AnimatedFabWithOptions(onFabOptionClick: (String) -> Unit = {}, eventDetails: List<SubEventDetails>?) {
+fun AnimatedFabWithOptions(
+    modifier: Modifier = Modifier,
+    onFabOptionClick: (String) -> Unit = {},
+    eventDetails: List<SubEventDetails>?,
+) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-
+    Box(modifier = modifier) {
         if (isExpanded) {
             Box(
                 modifier = Modifier
@@ -63,6 +65,8 @@ fun AnimatedFabWithOptions(onFabOptionClick: (String) -> Unit = {}, eventDetails
                     .clickable { isExpanded = false }
             )
         }
+
+        // FAB and options column
         Column(
             modifier = Modifier.align(Alignment.BottomEnd),
             horizontalAlignment = Alignment.End
@@ -79,21 +83,11 @@ fun AnimatedFabWithOptions(onFabOptionClick: (String) -> Unit = {}, eventDetails
                     animationSpec = tween(200)
                 ) + fadeOut(animationSpec = tween(200))
             ) {
-                if (eventDetails != null && eventDetails.isNotEmpty()){
-                    FabOption(
-                        icon = painterResource(R.drawable.camera),
-                        label = "Add Event",
-                        onClick = {
-                            onFabOptionClick("Add Event")
-                            isExpanded = false
-                        }
-                    )
-                }else {
+                if (eventDetails != null && eventDetails.isNotEmpty()) {
                     Column(
                         modifier = Modifier.padding(end = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-
                         FabOption(
                             icon = painterResource(R.drawable.camera),
                             label = "Photo",
@@ -119,30 +113,39 @@ fun AnimatedFabWithOptions(onFabOptionClick: (String) -> Unit = {}, eventDetails
                             }
                         )
                     }
+                } else {
+                    FabOption(
+                        icon = painterResource(R.drawable.camera),
+                        label = "Add Event",
+                        onClick = {
+                            onFabOptionClick("Add Event")
+                            isExpanded = false
+                        }
+                    )
                 }
             }
-
             Spacer(modifier = Modifier.height(5.dp))
-
             FloatingActionButton(
                 onClick = { isExpanded = !isExpanded },
-                modifier = Modifier.size(95.dp).padding(bottom = 45.dp, end = 45.dp),
+                modifier = Modifier
+                    .size(75.dp)
+                    .padding(bottom = 16.dp, end = 16.dp), // Reduced padding
                 containerColor = Color.White,
                 shape = RoundedCornerShape(35.dp)
             ) {
                 Image(
                     painter = painterResource(R.drawable.add),
                     contentDescription = if (isExpanded) "Close" else "Add",
-                    modifier = Modifier.fillMaxSize().graphicsLayer {
-                        rotationZ = if (isExpanded) 45f else 0f
-                    }
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationZ = if (isExpanded) 45f else 0f
+                        }
                 )
-
             }
         }
     }
 }
-
 @Composable
 fun FabOption(
     icon: Painter,

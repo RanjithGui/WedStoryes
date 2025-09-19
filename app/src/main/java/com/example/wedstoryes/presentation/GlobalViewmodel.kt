@@ -76,6 +76,9 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     else ->{}
                 }
             }
+            is GlobalEvent.onAddSubEvent ->{
+               addSubEvent(event.subEvent,event.eventName)
+            }
             is GlobalEvent.removeEventDetails -> {}
 
 
@@ -206,6 +209,22 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                 events = updatedEvents
             )
         }
+    }
+    fun addSubEvent(subEvent: String, eventName: String) {
+        val currentDetails = state.value.events
+        val existingDetails = currentDetails.find { it.title == eventName } ?: return // Exit if event not found
+        val updatedDetails: List<SubEventDetails> = existingDetails.eventDetails.plus(
+            SubEventDetails(subEvent, emptyList(), emptyList(), emptyList())
+        )
+
+        val updatedEvents = state.value.events.map { eventItem ->
+            if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                eventItem.copy(eventDetails = updatedDetails)
+            } else {
+                eventItem
+            }
+        }
+        updateState { it.copy(events = updatedEvents) }
     }
     fun updatePhotographerDetails(photographers: Photographers, eventName: String, index: Int, subEvent: String?) {
         val currentDetails = state.value.eventDetails

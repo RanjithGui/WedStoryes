@@ -4,5 +4,5 @@ data class SubEventDetails(
     val subEvent : String?=null,
     val photographers: List<Photographers>?=null,
     val videographers: List<Videographers>?=null,
-    val addons: List<Addons> = emptyList(),
+    val addons: List<Addons>? = null,
 )

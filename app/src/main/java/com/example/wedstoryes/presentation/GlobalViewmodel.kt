@@ -78,7 +78,26 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             is GlobalEvent.onAddSubEvent ->{
                addSubEvent(event.subEvent,event.eventName)
             }
-            is GlobalEvent.removeEventDetails -> {}
+            is GlobalEvent.removeEventDetails -> {
+                when(event.label){
+                    "Photo" ->{
+                        deletePhotographerDetails(
+                            eventName = event.eventName,
+                            index = event.index, subEvent = event.subEvent)
+                    }
+                    "Video" ->{
+                        deleteVideoGrapherDetails(
+                            eventName = event.eventName,
+                            index = event.index,subEvent=event.subEvent)
+                    }
+                    "Addons" ->{
+                        deleteAddonDetails(index = event.index, eventName = event.eventName, subEvent = event.subEvent)
+                    }
+
+
+                }
+            }
+
 
 
             else -> {}
@@ -90,13 +109,142 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
     fun updateEvents(events: List<EventItem>) {
        updateState { it.copy(events =  events) }
     }
+    fun deletePhotographerDetails(
+        eventName: String,
+        subEvent: String?,
+        index: Int
+    ) {
+        val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
+        val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
+        if (existingSubEventDetail!=null){
+            val updatedEventDetails = event.eventDetails.map { subEventDetail ->
+                if (subEventDetail.subEvent == subEvent) {
+                    val currentPhotographers = subEventDetail.photographers ?: emptyList()
+                    val updatedPhotographers = if (index >= 0 && index < currentPhotographers.size) {
+                        currentPhotographers.toMutableList().apply { removeAt(index) }
+                    } else {
+                        currentPhotographers
+                    }
+                    subEventDetail.copy(photographers = updatedPhotographers)
+                } else {
+                    subEventDetail
+                }
+            }
+            val finalEventDetails = updatedEventDetails.filter { subEventDetail ->
+                if (subEventDetail.subEvent == subEvent) {
+                    val photographersEmpty = subEventDetail.photographers.isNullOrEmpty()
+                    val videographersEmpty = subEventDetail.videographers.isNullOrEmpty()
+                    val addonsEmpty = subEventDetail.addons.isNullOrEmpty()
+                    !(photographersEmpty && videographersEmpty && addonsEmpty)
+                } else {
+                    true // Keep other subEvents
+                }
+            }
+            val updatedEvents = state.value.events.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = finalEventDetails)
+                } else {
+                    eventItem
+                }
+            }
+            updateState { currentState ->
+                currentState.copy(events = updatedEvents)
+            }
+        }
+    }
+    fun deleteVideoGrapherDetails(
+        eventName: String,
+        subEvent: String?,
+        index: Int
+    ) {
+        val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
+        val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
+        if (existingSubEventDetail!=null){
+            val updatedEventDetails = event.eventDetails.map { subEventDetail ->
+                if (subEventDetail.subEvent == subEvent) {
+                    val currentVideoGraphers = subEventDetail.videographers ?: emptyList()
+
+                    val updatedVideoGraphers = if (index >= 0 && index < currentVideoGraphers.size) {
+                        currentVideoGraphers.toMutableList().apply { removeAt(index) }
+                    } else {
+                        currentVideoGraphers
+                    }
+                    subEventDetail.copy(videographers = updatedVideoGraphers)
+                } else {
+                    subEventDetail
+                }
+            }
+            val finalEventDetails = updatedEventDetails.filter { subEventDetail ->
+                if (subEventDetail.subEvent == subEvent) {
+                    val photographersEmpty = subEventDetail.photographers.isNullOrEmpty()
+                    val videographersEmpty = subEventDetail.videographers.isNullOrEmpty()
+                    val addonsEmpty = subEventDetail.addons.isNullOrEmpty()
+                    !(photographersEmpty && videographersEmpty && addonsEmpty)
+                } else {
+                    true // Keep other subEvents
+                }
+            }
+            val updatedEvents = state.value.events.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = finalEventDetails)
+                } else {
+                    eventItem
+                }
+            }
+            updateState { currentState ->
+                currentState.copy(events = updatedEvents)
+            }
+        }
+    }
+    fun deleteAddonDetails(
+        eventName: String,
+        subEvent: String?,
+        index: Int
+    ) {
+        val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
+        val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
+        if (existingSubEventDetail!=null){
+            val updatedEventDetails = event.eventDetails.map { subEventDetail ->
+                if (subEventDetail.subEvent == subEvent) {
+                    val currentAddons = subEventDetail.addons ?: emptyList()
+
+                    val updatedAddons = if (index >= 0 && index < currentAddons.size) {
+                        currentAddons.toMutableList().apply { removeAt(index) }
+                    } else {
+                        currentAddons
+                    }
+                    subEventDetail.copy(addons = updatedAddons)
+                } else {
+                    subEventDetail
+                }
+            }
+            val finalEventDetails = updatedEventDetails.filter { subEventDetail ->
+                if (subEventDetail.subEvent == subEvent) {
+                    val photographersEmpty = subEventDetail.photographers.isNullOrEmpty()
+                    val videographersEmpty = subEventDetail.videographers.isNullOrEmpty()
+                    val addonsEmpty = subEventDetail.addons.isNullOrEmpty()
+                    !(photographersEmpty && videographersEmpty && addonsEmpty)
+                } else {
+                    true // Keep other subEvents
+                }
+            }
+            val updatedEvents = state.value.events.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = finalEventDetails)
+                } else {
+                    eventItem
+                }
+            }
+            updateState { currentState ->
+                currentState.copy(events = updatedEvents)
+            }
+        }
+    }
+
     fun addPhotographerDetails(photographers: Photographers, eventName: String, subEvent: String) {
         val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
-
         val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
-
         if (existingSubEventDetail != null) {
-            // SubEvent exists, proceed to add/update photographer details
             val updatedEventDetails = event.eventDetails.map { subEventDetail ->
                 if (subEventDetail.subEvent == subEvent) {
                     subEventDetail.copy(
@@ -116,24 +264,15 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             }
             updateState { currentState ->
                 currentState.copy(
-                    // Update eventDetails in the global state if it's directly used.
-                    // However, it's generally better to rely on the 'events' list as the source of truth.
-                    // If state.value.eventDetails is meant to be a cached/derived list of all sub-event details
-                    // across all events, you'll need to rebuild it here.
-                    // For simplicity, I'm assuming state.value.eventDetails is not the primary source of truth
-                    // for individual event's sub-event details.
                     events = updatedEvents
                 )
             }
         } else {
-            // SubEvent does not exist, show a Toast
             println("SubEvent '$subEvent' does not exist for event '$eventName'")        }
     }
     fun addVideographerDetails(videographers: Videographers, eventName: String, subEvent: String) {
         val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
-
         val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
-
         if (existingSubEventDetail != null) {
             // SubEvent exists, proceed to add/update photographer details
             val updatedEventDetails = event.eventDetails.map { subEventDetail ->
@@ -145,7 +284,6 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     subEventDetail
                 }
             }
-
             val updatedEvents = state.value.events.map { eventItem ->
                 if (eventItem.title.equals(eventName, ignoreCase = true)) {
                     eventItem.copy(eventDetails = updatedEventDetails)
@@ -155,33 +293,25 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             }
             updateState { currentState ->
                 currentState.copy(
-
                     events = updatedEvents
                 )
             }
         } else {
-            // SubEvent does not exist, show a Toast
             println("SubEvent '$subEvent' does not exist for event '$eventName'")        }
     }
     fun addAddonDetails(addons: Addons, eventName: String, subEvent: String) {
         val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
-
         val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
-
         if (existingSubEventDetail != null) {
-            // SubEvent exists, proceed to add/update photographer details
             val updatedEventDetails = event.eventDetails.map { subEventDetail ->
                 if (subEventDetail.subEvent == subEvent) {
-                    subEventDetail.addons.plus(addons).let {
                         subEventDetail.copy(
-                            addons = it
+                            addons = subEventDetail.addons?.plus(addons) ?: listOf(addons)
                         )
-                    }
                 } else {
                     subEventDetail
                 }
             }
-
             val updatedEvents = state.value.events.map { eventItem ->
                 if (eventItem.title.equals(eventName, ignoreCase = true)) {
                     eventItem.copy(eventDetails = updatedEventDetails)
@@ -348,7 +478,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         // Get the current list of photographers for that sub-event
         val currentAddonsList = subEventDetailToUpdate.addons
 
-        if (index >= 0 && index < currentAddonsList.size) {
+        if (currentAddonsList != null && index >= 0 && index < currentAddonsList.size) {
             // Create a mutable copy of the photographers list
             val mutableAddons = currentAddonsList.toMutableList()
             // Replace the item at the specified index

@@ -317,7 +317,7 @@ fun SubEventitem(eventDetails: List<SubEventDetails>, onEvent: (GlobalEvent) -> 
             }
 
 
-            if (existingDetail?.photographers?.isNotEmpty() ?: false) {
+            if (existingDetail?.addons?.isNotEmpty() ?: false) {
                 itemsIndexed(existingDetail.addons) { index, addon ->
                     EventDetailsItem(
                         label = "Addons",
@@ -547,6 +547,34 @@ fun EventDetailsItem(
                 OutlinedButton(
                     onClick = {
                     // onDelete()
+                        val selectedPhotographer = if (label == "Photo") {
+                            photographer.copy(
+                                type = selectedOption,
+                                nop = count,
+                                price = priceText
+                            )
+                        }else{
+                            null
+                        }
+                        val selectedvideographer = if (label == "Video") {
+                            videographer.copy(
+                                type = selectedOption,
+                                nop = count,
+                                price = priceText
+                            )
+                        }else{
+                            null
+                        }
+                        val selectedAddons = if (label == "Addons") {
+                            addons.copy(
+                                type = selectedOption,
+                                count=count,
+                               price = priceText
+                            )
+                        }else{
+                            null
+                        }
+                        onDelete(selectedPhotographer,selectedvideographer,selectedAddons)
                     },
                     enabled =true,
                     modifier = Modifier.size(22.dp),

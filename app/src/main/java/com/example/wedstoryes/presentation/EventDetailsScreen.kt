@@ -29,8 +29,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -67,7 +65,6 @@ import com.example.wedstoryes.customcomposables.AnimatedFabWithOptions
 import com.example.wedstoryes.customcomposables.CustomAlertDialog
 import com.example.wedstoryes.customcomposables.ExpandableCard
 import com.example.wedstoryes.data.Addons
-import com.example.wedstoryes.data.EventItem
 import com.example.wedstoryes.data.Photographers
 import com.example.wedstoryes.data.SubEventDetails
 import com.example.wedstoryes.data.Videographers
@@ -77,15 +74,16 @@ import com.example.wedstoryes.presentation.events.GlobalEvent
 fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController) {
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
     var openAlertDialog by remember { mutableStateOf(false) }
-    Log.d("EventDetailsScreen", "Selected Event Item: ${state.eventDetails}")
+    var selectedSubEvent by remember { mutableStateOf("") }
     val eventDetails = state.events.find { eventItem ->
         eventItem.title == state.selectedEventItem?.title
     }?.eventDetails
+    Log.d("SelectedEvents", "Selected events: ${eventDetails.toString()}")
+    Log.d("SelectedEvents", "Selected events: ${state.events.toString()}")
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxWidth().padding(start=24.dp, end = 24.dp)) {
             var isFabExpanded by remember { mutableStateOf(false) }
 
-            // Handle backdrop at parent level
             if (isFabExpanded) {
                 Box(
                     modifier = Modifier
@@ -124,10 +122,11 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
 
             if (eventDetails != null && eventDetails.isNotEmpty()) {
                 eventDetails.forEachIndexed { index, details ->
+                    selectedSubEvent = details.subEvent.toString()
                    Column(modifier = Modifier.fillMaxWidth().padding(top=10.dp)) {
                        ExpandableCard({
                            Text(
-                               text = details.subEvent.toString(),
+                               text = selectedSubEvent,
                                modifier = Modifier
                                    .fillMaxWidth().padding(start = 16.dp),
                                fontSize = 25.sp,
@@ -174,7 +173,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                 Photographers(0, "Select Type", "", ""),
                                 Videographers(),
                                 Addons(),
-                                subEvent = ""
+                                subEvent = selectedSubEvent
                             )
                         )
                     }
@@ -186,7 +185,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                 Photographers(),
                                 Videographers(0, "Select Type", "", ""),
                                 Addons(),
-                                subEvent = ""
+                                subEvent = selectedSubEvent
                             )
                         )
                     }
@@ -202,7 +201,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                     0,
                                     "",
                                     details = ""
-                                ), subEvent =""
+                                ), subEvent =selectedSubEvent
                             )
                         )
                     }
@@ -385,16 +384,40 @@ fun EventDetailsItem(
     }
     val pvOptions = listOf("Traditional", "Candid")
     val otherOptions = listOf("Drone", "Albums","Led Screen","Live Streaming","Makeup Artist","Decorations","Invitations")
-    var count by remember {
+    var rawPrice by remember(label, photographer, videographer, addons) {
         mutableStateOf(
-            when(label) {
-                "Photo" -> photographer.nop?.takeIf { it != 0 } ?: 0
-                "Video" -> videographer.nop?.takeIf { it != 0 } ?: 0
-                "Addons" -> addons.count.takeIf { it != 0 } ?: 0
-                else -> 0
+            when(label){
+                "Photo" -> photographer.price?.filter { it.isDigit() } ?: ""
+                "Video" -> videographer.price?.filter { it.isDigit() } ?: ""
+                "Addons" -> addons.price?.filter { it.isDigit() } ?: ""
+                else -> ""
             }
         )
     }
+
+    var displayPrice by remember(label, photographer, videographer, addons) {
+        mutableStateOf(
+            when(label){
+                "Photo" -> photographer.price ?: ""
+                "Video" -> videographer.price ?: ""
+                "Addons" -> addons.price ?: ""
+                else -> ""
+            }
+        )
+    }
+
+    // Initialize count state with existing data
+    var count by remember(label, photographer, videographer, addons) {
+        mutableStateOf(
+            when(label){
+                "Photo" -> if (photographer.nop != null && photographer.nop != 0) photographer.nop else 1
+                "Video" -> if (videographer.nop != null && videographer.nop != 0) videographer.nop else 1
+                "Addons" -> if (addons.count != 0) addons.count else 1
+                else -> 1
+            }
+        )
+    }
+
 
     var priceText by remember { mutableStateOf("") }
 
@@ -467,17 +490,10 @@ fun EventDetailsItem(
             }
 
             Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-                var rawPrice by remember { mutableStateOf("") }
-                var displayPrice by remember { mutableStateOf("") }
                 OutlinedTextField(
                     modifier = Modifier.weight(5f).padding(vertical = 4.dp),
                     shape = RoundedCornerShape(35.dp),
-                    value = when(label){
-                        "Photo" -> if (photographer.price?.isNotEmpty() == true) photographer.price else displayPrice
-                        "Video" -> if (videographer.price?.isNotEmpty() == true) videographer.price else displayPrice
-                        "Addons" -> if (addons.price?.isNotEmpty() == true) addons.price else displayPrice
-                        else -> {}
-                    }.toString(),
+                    value = displayPrice,
                     onValueChange = { newValue ->
 
                         val digitsOnly = newValue.filter { it.isDigit() }
@@ -515,12 +531,7 @@ fun EventDetailsItem(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 CounterButtons(
-                    when(label){
-                        "Photo" -> if (photographer.nop != null && photographer.nop != 0) photographer.nop else count
-                        "Video" -> if (videographer.nop != null && videographer.nop != 0) videographer.nop else count
-                        "Addons" -> if (addons.count != 0) addons.count else count
-                        else -> {}
-                    } as Int, onValueChange = {
+                    count, onValueChange = {
                     count = it
                 },
                     modifier = Modifier

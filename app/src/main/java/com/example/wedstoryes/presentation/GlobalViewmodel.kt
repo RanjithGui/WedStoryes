@@ -13,7 +13,6 @@ import kotlin.collections.map
 
 class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
     override fun initState()= GlobalState()
-
     init {
         updateEvents(events = listOf(
             EventItem("wedding", "Wedding", R.drawable.wedding, eventDetails = emptyList()),
@@ -71,7 +70,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                             index = event.index,event.subEvent)
                     }
                     "Addons" ->{
-                        //updateAddonAtIndex(event.index,event.addons, eventName = event.eventName,event.subEvent)
+                        updateAddonAtIndex(event.index,event.addons,event.eventName,event.subEvent)
                     }
                     else ->{}
                 }
@@ -92,13 +91,13 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
        updateState { it.copy(events =  events) }
     }
     fun addPhotographerDetails(photographers: Photographers, eventName: String, subEvent: String) {
-        val currentDetails = state.value.eventDetails
+        val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
 
-        val existingDetail = currentDetails.find { it.subEvent == subEvent }
+        val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
 
-        val updatedDetails = if (existingDetail != null) {
-            // Update existing SubEventDetails
-            currentDetails.map { subEventDetail ->
+        if (existingSubEventDetail != null) {
+            // SubEvent exists, proceed to add/update photographer details
+            val updatedEventDetails = event.eventDetails.map { subEventDetail ->
                 if (subEventDetail.subEvent == subEvent) {
                     subEventDetail.copy(
                         photographers = subEventDetail.photographers?.plus(photographers)
@@ -107,36 +106,37 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     subEventDetail
                 }
             }
-        } else {
-            // Add new SubEventDetails
-            currentDetails + SubEventDetails(
-                photographers = listOf(photographers),
-                videographers = emptyList(),
-                addons = emptyList(),
-                subEvent = subEvent
-            )
-        }
-        val updatedEvents = state.value.events.map { eventItem ->
-            if (eventItem.title.equals(eventName, ignoreCase = true)) {
-                eventItem.copy(eventDetails = updatedDetails)
-            } else {
-                eventItem
+
+            val updatedEvents = state.value.events.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = updatedEventDetails)
+                } else {
+                    eventItem
+                }
             }
-        }
-        updateState { currentState ->
-            currentState.copy(
-                eventDetails = updatedDetails,
-                events = updatedEvents
-            )
-        }
+            updateState { currentState ->
+                currentState.copy(
+                    // Update eventDetails in the global state if it's directly used.
+                    // However, it's generally better to rely on the 'events' list as the source of truth.
+                    // If state.value.eventDetails is meant to be a cached/derived list of all sub-event details
+                    // across all events, you'll need to rebuild it here.
+                    // For simplicity, I'm assuming state.value.eventDetails is not the primary source of truth
+                    // for individual event's sub-event details.
+                    events = updatedEvents
+                )
+            }
+        } else {
+            // SubEvent does not exist, show a Toast
+            println("SubEvent '$subEvent' does not exist for event '$eventName'")        }
     }
     fun addVideographerDetails(videographers: Videographers, eventName: String, subEvent: String) {
-        val currentDetails = state.value.eventDetails
-        // Find existing SubEventDetails with matching subEvent
-        val existingDetail = currentDetails.find { it.subEvent == subEvent }
-        val updatedDetails = if (existingDetail != null) {
-            // Update existing SubEventDetails
-            currentDetails.map { subEventDetail ->
+        val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
+
+        val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
+
+        if (existingSubEventDetail != null) {
+            // SubEvent exists, proceed to add/update photographer details
+            val updatedEventDetails = event.eventDetails.map { subEventDetail ->
                 if (subEventDetail.subEvent == subEvent) {
                     subEventDetail.copy(
                         videographers = subEventDetail.videographers?.plus(videographers)
@@ -145,70 +145,57 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     subEventDetail
                 }
             }
-        } else {
-            // Add new SubEventDetails
-            currentDetails + SubEventDetails(
-                photographers = emptyList(),
-                videographers = listOf(videographers),
-                addons = emptyList(),
-                subEvent = subEvent
-            )
-        }
-        val updatedEvents = state.value.events.map { eventItem ->
-            if (eventItem.title.equals(eventName, ignoreCase = true)) {
-                eventItem.copy(eventDetails = updatedDetails)
-            } else {
-                eventItem
+
+            val updatedEvents = state.value.events.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = updatedEventDetails)
+                } else {
+                    eventItem
+                }
             }
-        }
-        updateState { currentState ->
-            currentState.copy(
-                eventDetails = updatedDetails,
-                events = updatedEvents
-            )
-        }
+            updateState { currentState ->
+                currentState.copy(
+
+                    events = updatedEvents
+                )
+            }
+        } else {
+            // SubEvent does not exist, show a Toast
+            println("SubEvent '$subEvent' does not exist for event '$eventName'")        }
     }
     fun addAddonDetails(addons: Addons, eventName: String, subEvent: String) {
-        val currentDetails = state.value.eventDetails
+        val event = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
 
-        // Find existing SubEventDetails with matching subEvent
-        val existingDetail = currentDetails.find { it.subEvent == subEvent }
+        val existingSubEventDetail = event?.eventDetails?.find { it.subEvent == subEvent }
 
-        val updatedDetails = if (existingDetail != null) {
-            // Update existing SubEventDetails
-            currentDetails.map { subEventDetail ->
+        if (existingSubEventDetail != null) {
+            // SubEvent exists, proceed to add/update photographer details
+            val updatedEventDetails = event.eventDetails.map { subEventDetail ->
                 if (subEventDetail.subEvent == subEvent) {
-                    subEventDetail.copy(
-                        addons = subEventDetail.addons + addons
-                    )
+                    subEventDetail.addons.plus(addons).let {
+                        subEventDetail.copy(
+                            addons = it
+                        )
+                    }
                 } else {
                     subEventDetail
                 }
             }
-        } else {
-            // Add new SubEventDetails
-            currentDetails + SubEventDetails(
-                photographers = emptyList(),
-                videographers = emptyList(),
-                addons = listOf(addons),
-                subEvent = subEvent
-            )
-        }
 
-        val updatedEvents = state.value.events.map { eventItem ->
-            if (eventItem.title.equals(eventName, ignoreCase = true)) {
-                eventItem.copy(eventDetails = updatedDetails)
-            } else {
-                eventItem
+            val updatedEvents = state.value.events.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    eventItem.copy(eventDetails = updatedEventDetails)
+                } else {
+                    eventItem
+                }
             }
-        }
-
-        updateState { currentState ->
-            currentState.copy(
-                eventDetails = updatedDetails,
-                events = updatedEvents
-            )
-        }
+            updateState { currentState ->
+                currentState.copy(
+                    events = updatedEvents
+                )
+            }
+        } else {
+            println("SubEvent '$subEvent' does not exist for event '$eventName'")        }
     }
     fun addSubEvent(subEvent: String, eventName: String) {
         val currentDetails = state.value.events
@@ -227,29 +214,48 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         updateState { it.copy(events = updatedEvents) }
     }
     fun updatePhotographerDetails(photographers: Photographers, eventName: String, index: Int, subEvent: String?) {
-        val currentDetails = state.value.eventDetails
-
-        val updatedEventDetails = currentDetails.map { subEventDetail ->
-            if (subEventDetail.subEvent == subEvent) {
-                val updatedPhotographers = subEventDetail.photographers?.toMutableList()
-
-                if (index >= 0 && updatedPhotographers?.size?.let { index < it } == true) {
-                    updatedPhotographers[index] = photographers
-                    subEventDetail.copy(photographers = updatedPhotographers)
-                } else {
-                    println("Invalid index: $index for photographers list of size ${updatedPhotographers?.size} in subEvent '$subEvent'")
-                    subEventDetail // Return unchanged if invalid index
-                }
-            } else {
-                subEventDetail // Return unchanged if not the target subEvent
-            }
+        // Find the specific EventItem
+        val eventToUpdate = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
+        if (eventToUpdate == null) {
+            println("Event '$eventName' not found for updating photographer.")
+            return
         }
 
-        // Check if any update actually happened
-        if (updatedEventDetails != currentDetails) {
-            val updatedEvents = state.value.events.map { eventItem ->
+        // Find the specific SubEventDetails within that EventItem
+        val subEventDetailToUpdate = eventToUpdate.eventDetails.find { it.subEvent == subEvent }
+        if (subEventDetailToUpdate == null) {
+            println("SubEvent '$subEvent' not found in event '$eventName' for updating photographer.")
+            return
+        }
+
+        // Get the current list of photographers for that sub-event
+        val currentPhotographersList = subEventDetailToUpdate.photographers
+
+        if (currentPhotographersList != null && index >= 0 && index < currentPhotographersList.size) {
+            // Create a mutable copy of the photographers list
+            val mutablePhotographers = currentPhotographersList.toMutableList()
+            // Replace the item at the specified index
+            mutablePhotographers[index] = photographers
+
+            // Create updated SubEventDetails with the modified photographers list
+            val updatedSubEventDetails = subEventDetailToUpdate.copy(photographers = mutablePhotographers)
+
+            // Create updated eventDetails list for the specific event
+            val updatedEventDetailsListForEvent = eventToUpdate.eventDetails.map { detail ->
+                if (detail.subEvent == subEvent) {
+                    updatedSubEventDetails
+                } else {
+                    detail
+                }
+            }
+
+            // Create the updated EventItem
+            val updatedEventItem = eventToUpdate.copy(eventDetails = updatedEventDetailsListForEvent)
+
+            // Update the main events list in the state
+            val updatedEventsList = state.value.events.map { eventItem ->
                 if (eventItem.title.equals(eventName, ignoreCase = true)) {
-                    eventItem.copy(eventDetails = updatedEventDetails)
+                    updatedEventItem
                 } else {
                     eventItem
                 }
@@ -257,38 +263,56 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
             updateState { currentState ->
                 currentState.copy(
-                    eventDetails = updatedEventDetails,
-                    events = updatedEvents
+                    events = updatedEventsList
+                    // If state.value.eventDetails is a flat list of all sub-event details,
+                    // you'll need to rebuild it here based on the updatedEventsList.
+                    // For example:
+                    // eventDetails = updatedEventsList.flatMap { it.eventDetails }
                 )
             }
+            println("Successfully updated photographer at index $index in subEvent '$subEvent' of event '$eventName'")
 
-            println("Successfully updated photographer at index $index in subEvent '$subEvent'")
+        } else {
+            println("Invalid index: $index for photographers list of size ${currentPhotographersList?.size} in subEvent '$subEvent', or photographers list is null.")
         }
     }
+
     fun updateVideographerDetails(videographers: Videographers, eventName: String, index: Int, subEvent: String?) {
-        val currentDetails = state.value.eventDetails
-
-        val updatedEventDetails = currentDetails.map { subEventDetail ->
-            if (subEventDetail.subEvent == subEvent) {
-                val updatedVideographers = subEventDetail.videographers?.toMutableList()
-
-                if (index >= 0 && updatedVideographers?.size?.let { index < it } == true) {
-                    updatedVideographers[index] = videographers
-                    subEventDetail.copy(videographers = updatedVideographers)
-                } else {
-                    println("Invalid index: $index for videographers list of size ${updatedVideographers?.size} in subEvent '$subEvent'")
-                    subEventDetail
-                }
-            } else {
-                subEventDetail
-            }
+        val eventToUpdate = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
+        if (eventToUpdate == null) {
+            println("Event '$eventName' not found for updating photographer.")
+            return
         }
 
-        // Check if any update actually happened
-        if (updatedEventDetails != currentDetails) {
-            val updatedEvents = state.value.events.map { eventItem ->
+        val subEventDetailToUpdate = eventToUpdate.eventDetails.find { it.subEvent == subEvent }
+        if (subEventDetailToUpdate == null) {
+            println("SubEvent '$subEvent' not found in event '$eventName' for updating photographer.")
+            return
+        }
+        val currentVideographersList = subEventDetailToUpdate.videographers
+
+        if (currentVideographersList != null && index >= 0 && index < currentVideographersList.size) {
+
+            val mutableVideographers = currentVideographersList.toMutableList()
+
+            mutableVideographers[index] = videographers
+
+            val updatedSubEventDetails = subEventDetailToUpdate.copy(videographers = mutableVideographers)
+
+            val updatedEventDetailsListForEvent = eventToUpdate.eventDetails.map { detail ->
+                if (detail.subEvent == subEvent) {
+                    updatedSubEventDetails
+                } else {
+                    detail
+                }
+            }
+            // Create the updated EventItem
+            val updatedEventItem = eventToUpdate.copy(eventDetails = updatedEventDetailsListForEvent)
+
+            // Update the main events list in the state
+            val updatedEventsList = state.value.events.map { eventItem ->
                 if (eventItem.title.equals(eventName, ignoreCase = true)) {
-                    eventItem.copy(eventDetails = updatedEventDetails)
+                    updatedEventItem
                 } else {
                     eventItem
                 }
@@ -296,37 +320,79 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
             updateState { currentState ->
                 currentState.copy(
-                    eventDetails = updatedEventDetails,
-                    events = updatedEvents
+                    events = updatedEventsList
+
                 )
             }
+            println("Successfully updated photographer at index $index in subEvent '$subEvent' of event '$eventName'")
 
-            println("Successfully updated videographer at index $index in subEvent '$subEvent'")
+        } else {
+            println("Invalid index: $index for photographers list of size ${currentVideographersList?.size} in subEvent '$subEvent', or photographers list is null.")
         }
     }
 
-   /* fun updateAddonAtIndex(index: Int, newAddon: Addons,eventName: String, subEvent: String) {
-        val currentDetails = state.value.eventDetails.find { it.subEvent == subEvent }
-            currentDetails?.let { details ->
-                if (index in details.addons.indices) {
-                    val updatedAddons = details.addons.toMutableList()
-                    updatedAddons[index] = newAddon
-                    val updatedDetails = details.copy(addons = updatedAddons)
-                    updateState { it.copy(eventDetails = updatedDetails) }
-                    val currentEvents = state.value.events.toMutableList()
-                    val updatedEvents = currentEvents.map { eventItem ->
-                        if (eventItem.title.equals(eventName, ignoreCase = true)) {
-                            eventItem.copy(eventDetails = updatedDetails)
-                        } else {
-                            eventItem
-                        }
-                    }
-                    updateState { currentState ->
-                        currentState.copy(events = updatedEvents)
-                    }
-                }
-    }
+    fun updateAddonAtIndex(index: Int, newAddon: Addons, eventName: String, subEvent: String?) {
+        val eventToUpdate = state.value.events.find { it.title.equals(eventName, ignoreCase = true) }
+        if (eventToUpdate == null) {
+            println("Event '$eventName' not found for updating photographer.")
+            return
+        }
 
-   }*/
+        // Find the specific SubEventDetails within that EventItem
+        val subEventDetailToUpdate = eventToUpdate.eventDetails.find { it.subEvent == subEvent }
+        if (subEventDetailToUpdate == null) {
+            println("SubEvent '$subEvent' not found in event '$eventName' for updating photographer.")
+            return
+        }
+
+        // Get the current list of photographers for that sub-event
+        val currentAddonsList = subEventDetailToUpdate.addons
+
+        if (index >= 0 && index < currentAddonsList.size) {
+            // Create a mutable copy of the photographers list
+            val mutableAddons = currentAddonsList.toMutableList()
+            // Replace the item at the specified index
+            mutableAddons[index] = newAddon
+
+            // Create updated SubEventDetails with the modified photographers list
+            val updatedSubEventDetails = subEventDetailToUpdate.copy(addons = mutableAddons)
+
+            // Create updated eventDetails list for the specific event
+            val updatedEventDetailsListForEvent = eventToUpdate.eventDetails.map { detail ->
+                if (detail.subEvent == subEvent) {
+                    updatedSubEventDetails
+                } else {
+                    detail
+                }
+            }
+
+            // Create the updated EventItem
+            val updatedEventItem = eventToUpdate.copy(eventDetails = updatedEventDetailsListForEvent)
+
+            // Update the main events list in the state
+            val updatedEventsList = state.value.events.map { eventItem ->
+                if (eventItem.title.equals(eventName, ignoreCase = true)) {
+                    updatedEventItem
+                } else {
+                    eventItem
+                }
+            }
+
+            updateState { currentState ->
+                currentState.copy(
+                    events = updatedEventsList
+                    // If state.value.eventDetails is a flat list of all sub-event details,
+                    // you'll need to rebuild it here based on the updatedEventsList.
+                    // For example:
+                    // eventDetails = updatedEventsList.flatMap { it.eventDetails }
+                )
+            }
+            println("Successfully updated photographer at index $index in subEvent '$subEvent' of event '$eventName'")
+
+        } else {
+            println("Invalid index: $index for photographers list of size ${currentAddonsList?.size} in subEvent '$subEvent', or photographers list is null.")
+        }
+
+   }
 
 }

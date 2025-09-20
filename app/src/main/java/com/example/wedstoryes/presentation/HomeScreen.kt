@@ -66,7 +66,7 @@ fun HomeScreen(getStarted: () -> Unit) {
     }
     Box(modifier = Modifier.fillMaxSize().background(color = colorResource(R.color.teal_200)) ){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CustomVideoPlayer(videoRes = R.raw.video_background)
+            CustomVideoPlayer(videoRes = R.raw.bgvideo)
         }
         Column (modifier = Modifier
             .fillMaxSize().padding(16.dp)){

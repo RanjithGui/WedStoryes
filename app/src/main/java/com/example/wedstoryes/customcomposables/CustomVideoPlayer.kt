@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -25,6 +26,7 @@ fun CustomVideoPlayer(
     val context = LocalContext.current
     val player: ExoPlayer = videoPlayerViewModel.exoPlayer
 
+    player.repeatMode = Player.REPEAT_MODE_ONE
 
     LaunchedEffect(videoRes) {
         videoPlayerViewModel.playVideo(videoRes)
@@ -39,6 +41,7 @@ fun CustomVideoPlayer(
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                 this.player = player
                 playerView = this
+
             }
         },
         modifier = Modifier.fillMaxSize(),

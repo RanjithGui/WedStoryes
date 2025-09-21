@@ -75,6 +75,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
     var openAlertDialog by remember { mutableStateOf(false) }
     var selectedSubEvent by remember { mutableStateOf("") }
+    var expandedStates by remember { mutableStateOf(mutableMapOf<String, Boolean>()) }
     val eventDetails = state.events.find { eventItem ->
         eventItem.title == state.selectedEventItem?.title
     }?.eventDetails
@@ -122,11 +123,12 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
 
             if (eventDetails != null && eventDetails.isNotEmpty()) {
                 eventDetails.forEachIndexed { index, details ->
-                    selectedSubEvent = details.subEvent.toString()
+                     val currentSubEvent = details.subEvent.toString()
+                    val isExpanded = expandedStates[selectedSubEvent] ?: false
                    Column(modifier = Modifier.fillMaxWidth().padding(top=10.dp)) {
                        ExpandableCard({
                            Text(
-                               text = selectedSubEvent,
+                               text = currentSubEvent,
                                modifier = Modifier
                                    .fillMaxWidth().padding(start = 16.dp),
                                fontSize = 25.sp,
@@ -137,7 +139,17 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                fontFamily = FontFamily.Cursive
                            ) },
                            { SubEventitem(eventDetails,onEvent,state,details.subEvent) },
-                           isExpandedText = false)
+                           isExpandedText = isExpanded,
+                           onExpandedChange = { expanded ->
+                               expandedStates = expandedStates.toMutableMap().apply {
+                                   // Close all other cards when one is expanded
+                                   keys.forEach { key -> this[key] = false }
+                                   this[currentSubEvent] = expanded
+                               }
+                               // Update selected subevent to the currently expanded one
+                               selectedSubEvent = if (expanded) currentSubEvent else ""
+                           }
+                       )
                    }
                 }
             } else {
@@ -162,58 +174,62 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                 }
             }
         }
-        AnimatedFabWithOptions(
-            onFabOptionClick = { label ->
-                when (label) {
-                    "Photo" -> {
-                        onEvent(
-                            GlobalEvent.onAddEventDetails(
-                                "Photo",
-                                state.selectedEventItem?.title ?: "",
-                                Photographers(0, "Select Type", "", ""),
-                                Videographers(),
-                                Addons(),
-                                subEvent = selectedSubEvent
+        val currentSubEventExpanded =  expandedStates.values.any { it }
+
+            AnimatedFabWithOptions(
+                onFabOptionClick = { label ->
+                    when (label) {
+                        "Photo" -> {
+                            onEvent(
+                                GlobalEvent.onAddEventDetails(
+                                    "Photo",
+                                    state.selectedEventItem?.title ?: "",
+                                    Photographers(0, "Select Type", "", ""),
+                                    Videographers(),
+                                    Addons(),
+                                    subEvent = selectedSubEvent
+                                )
                             )
-                        )
-                    }
-                    "Video" -> {
-                        onEvent(
-                            GlobalEvent.onAddEventDetails(
-                                "Video",
-                                state.selectedEventItem?.title ?: "",
-                                Photographers(),
-                                Videographers(0, "Select Type", "", ""),
-                                Addons(),
-                                subEvent = selectedSubEvent
+                        }
+                        "Video" -> {
+                            onEvent(
+                                GlobalEvent.onAddEventDetails(
+                                    "Video",
+                                    state.selectedEventItem?.title ?: "",
+                                    Photographers(),
+                                    Videographers(0, "Select Type", "", ""),
+                                    Addons(),
+                                    subEvent = selectedSubEvent
+                                )
                             )
-                        )
-                    }
-                    "Addons" -> {
-                        onEvent(
-                            GlobalEvent.onAddEventDetails(
-                                "Addons",
-                                state.selectedEventItem?.title ?: "",
-                                Photographers(),
-                                Videographers(),
-                                Addons(
-                                    "Select Type",
-                                    0,
-                                    "",
-                                    details = ""
-                                ), subEvent =selectedSubEvent
+                        }
+                        "Addons" -> {
+                            onEvent(
+                                GlobalEvent.onAddEventDetails(
+                                    "Addons",
+                                    state.selectedEventItem?.title ?: "",
+                                    Photographers(),
+                                    Videographers(),
+                                    Addons(
+                                        "Select Type",
+                                        0,
+                                        "",
+                                        details = ""
+                                    ), subEvent =selectedSubEvent
+                                )
                             )
-                        )
-                    }
-                    "Add Event" ->{
-                       println("added subevent")
-                        openAlertDialog =true
+                        }
+                        "Add Event" ->{
+                            println("added subevent")
+                            openAlertDialog =true
+                        }
                     }
                 }
-            }
-        , eventDetails = eventDetails,modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp))
+                , eventDetails = eventDetails,modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp), subEventExpanded = currentSubEventExpanded)
+
+
         if (openAlertDialog){
             CustomAlertDialog(openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {
                 onEvent.invoke(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),it))

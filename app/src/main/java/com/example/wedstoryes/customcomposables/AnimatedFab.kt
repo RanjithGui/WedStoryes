@@ -53,6 +53,8 @@ fun AnimatedFabWithOptions(
     modifier: Modifier = Modifier,
     onFabOptionClick: (String) -> Unit = {},
     eventDetails: List<SubEventDetails>?,
+    subEventExpanded: Boolean,
+
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -83,7 +85,7 @@ fun AnimatedFabWithOptions(
                     animationSpec = tween(200)
                 ) + fadeOut(animationSpec = tween(200))
             ) {
-                if (eventDetails != null && eventDetails.isNotEmpty()) {
+                if (eventDetails != null && eventDetails.isNotEmpty() &&subEventExpanded) {
                     Column(
                         modifier = Modifier.padding(end = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)

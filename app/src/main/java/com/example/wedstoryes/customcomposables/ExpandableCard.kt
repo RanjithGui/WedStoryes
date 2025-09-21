@@ -27,36 +27,64 @@ import com.example.wedstoryes.R
 
 
 @Composable
-fun ExpandableCard( headerContent: @Composable () -> Unit, itemContent: @Composable () -> Unit, isExpandedText : Boolean = false ) {
+fun ExpandableCard(
+    headerContent: @Composable () -> Unit,
+    itemContent: @Composable () -> Unit,
+    isExpandedText: Boolean = false,
+    onExpandedChange: (Boolean) -> Unit = {}
+) {
     var isExpanded by remember { mutableStateOf(isExpandedText) }
-    Column( modifier = Modifier.fillMaxWidth() .clickable { isExpanded = !isExpanded } )
-    {
 
-            ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(5.dp), elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp)) {
-                Row( modifier = Modifier .fillMaxWidth() .padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, )
-                {
-                    Box(modifier = Modifier.weight(1f)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                isExpanded = !isExpanded
+                onExpandedChange(isExpanded)
+            }
+    ) {
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(5.dp),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
                     headerContent()
                 }
-                    Icon(
-                        painter = painterResource(
-                            id = if (isExpanded) {
-                                R.drawable.uparrow
-                            } else {
-                                R.drawable.arrowdown
-                            }
-                        ),
-                        contentDescription = null, tint = Color.Black,
-                        modifier = Modifier.padding(top = 12.dp,end=24.dp).size(20.dp)
-                    )
+                Icon(
+                    painter = painterResource(
+                        id = if (isExpanded) {
+                            R.drawable.uparrow
+                        } else {
+                            R.drawable.arrowdown
+                        }
+                    ),
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier
+                        .padding(top = 12.dp, end = 24.dp)
+                        .size(20.dp)
+                )
             }
         }
+
         AnimatedVisibility(visible = isExpanded) {
-            Column(modifier = Modifier.padding(top = 8.dp))
-            { itemContent() }
+            Column(modifier = Modifier.padding(top = 8.dp)) {
+                itemContent()
+            }
         }
     }
-           if(!isExpanded)
-               Divider(Modifier .fillMaxWidth() .padding(bottom =3.dp ))
 
+    if (!isExpanded)
+        Divider(
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 3.dp)
+        )
 }

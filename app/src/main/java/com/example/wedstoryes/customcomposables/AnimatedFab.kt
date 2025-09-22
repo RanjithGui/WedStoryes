@@ -70,7 +70,7 @@ fun AnimatedFabWithOptions(
 
         // FAB and options column
         Column(
-            modifier = Modifier.align(Alignment.BottomEnd),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 75.dp),
             horizontalAlignment = Alignment.End
         ) {
             // Option buttons (appear above main FAB)

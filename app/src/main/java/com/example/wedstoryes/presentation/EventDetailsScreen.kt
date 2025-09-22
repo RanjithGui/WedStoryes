@@ -1,6 +1,7 @@
 package com.example.wedstoryes.presentation
 
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,6 +58,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,7 +75,7 @@ import com.example.wedstoryes.data.Videographers
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
 @Composable
-fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController) {
+fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController,onContinue:()-> Unit) {
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
     var openAlertDialog by remember { mutableStateOf(false) }
     var selectedSubEvent by remember { mutableStateOf("") }
@@ -228,6 +232,18 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                 , eventDetails = eventDetails,modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp), subEventExpanded = currentSubEventExpanded)
+
+        androidx.compose.material3.Button(
+            onClick = {
+                 onContinue.invoke()
+            }, enabled = !currentSubEventExpanded && eventDetails?.isNotEmpty() ?: false,
+            modifier = Modifier.align(Alignment.BottomCenter)
+                .padding( start = 16.dp, end = 16.dp, bottom = 32.dp).fillMaxWidth(),
+            colors = ButtonColors(containerColor = colorResource(R.color.wedstoreys),
+                contentColor = Color.White, disabledContainerColor = Color.Gray, disabledContentColor = Color.LightGray)
+        ) {
+            Text(text = "Continue")
+        }
 
 
         if (openAlertDialog){
@@ -483,7 +499,7 @@ fun EventDetailsItem(
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
-                        shape = RoundedCornerShape(5.dp),
+                        shape = ShapeDefaults.ExtraSmall,
                         modifier = Modifier.padding(8.dp).width(buttonWidth)
                     ) {
                         var options =listOf<String>()
@@ -508,7 +524,7 @@ fun EventDetailsItem(
             Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                 OutlinedTextField(
                     modifier = Modifier.weight(5f).padding(vertical = 4.dp),
-                    shape = RoundedCornerShape(35.dp),
+                    shape = RoundedCornerShape(15.dp),
                     value = displayPrice,
                     onValueChange = { newValue ->
 
@@ -552,7 +568,7 @@ fun EventDetailsItem(
                 },
                     modifier = Modifier
                         .weight(3f)
-                        .align(Alignment.CenterVertically),
+                        .align(Alignment.CenterVertically).padding(top = 5.dp),
                     minValue = 1,
                     maxValue = 20,
                     step = 1

@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.wedstoryes.navigation.Route
+import com.example.wedstoryes.presentation.ClientDetailsScreen
 import com.example.wedstoryes.presentation.EventDetailsScreen
 import com.example.wedstoryes.presentation.EventType
 import com.example.wedstoryes.presentation.GlobalViewmodel
@@ -48,7 +49,13 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(Route.EventDetails.value) {
-                        EventDetailsScreen(viewmodel, viewmodel::onEvent, navController = nav)
+                        EventDetailsScreen(viewmodel, viewmodel::onEvent, navController = nav,onContinue = {
+                            nav.navigate(Route.CustomerDetails.value)
+                        })
+                    }
+
+                    composable(Route.CustomerDetails.value){
+                       ClientDetailsScreen(viewmodel, viewmodel::onEvent, navController = nav)
                     }
                 }
             }

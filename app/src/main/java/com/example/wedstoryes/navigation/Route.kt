@@ -7,4 +7,6 @@ sealed class Route(val value: String) {
     data object Gallery : Route("gallery")
     data object EventDetails : Route("eventdetails")
 
+    data object CustomerDetails : Route("customerdetails")
+
 }

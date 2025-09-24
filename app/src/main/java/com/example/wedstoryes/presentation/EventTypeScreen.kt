@@ -138,14 +138,14 @@ fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navContro
         }
     if (openAlertDialog) {
        CustomAlertDialog(eventDetailsScreen = false, openDialog= true, onDismiss = {openAlertDialog=false},
-           onConfirm = {/*onEvent.invoke(
+           onConfirm = {onEvent.invoke(
            GlobalEvent.onCustomEvent(EventItem(
-               id = it,
-               title = it,
+               id = it.first,
+               title = it.first,
                videoUri = R.drawable.customevent,
                eventDetails = emptyList()
            )))
-       selectedIndex =state.events.indexOfFirst { true }*/
+       selectedIndex =state.events.indexOfFirst { true }
        onProceed.invoke()
        }
        )

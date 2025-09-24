@@ -76,7 +76,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                 }
             }
             is GlobalEvent.onAddSubEvent ->{
-               addSubEvent(event.subEvent,event.eventName)
+               addSubEvent(event.subEvent,event.eventName,event.time,event.date)
             }
             is GlobalEvent.removeEventDetails -> {
                 when(event.label){
@@ -327,11 +327,11 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         } else {
             println("SubEvent '$subEvent' does not exist for event '$eventName'")        }
     }
-    fun addSubEvent(subEvent: String, eventName: String) {
+    fun addSubEvent(subEvent: String, eventName: String,time: String,date: String) {
         val currentDetails = state.value.events
         val existingDetails = currentDetails.find { it.title == eventName } ?: return // Exit if event not found
         val updatedDetails: List<SubEventDetails> = existingDetails.eventDetails.plus(
-            SubEventDetails(subEvent, emptyList(), emptyList(), emptyList())
+            SubEventDetails(subEvent, time, date, emptyList(),emptyList(),emptyList())
         )
 
         val updatedEvents = state.value.events.map { eventItem ->

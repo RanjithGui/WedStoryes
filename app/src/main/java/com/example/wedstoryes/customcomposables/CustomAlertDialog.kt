@@ -163,12 +163,26 @@ fun CustomAlertDialog(
                             Text("Cancel")
                         }
                         Button (onClick = {
-                            if (text.isEmpty()||selectedOption.equals("Select Time")||selectedDate==null){
-                                Toast.makeText(localContext, "Please Fill all the Fields above", Toast.LENGTH_SHORT).show()
-                            }else{
-                                onConfirm(Triple(text,selectedOption,selectedDate.toString()))
-                                onDismiss()
+                            when(eventDetailsScreen){
+                                true -> {
+                                    if (text.isEmpty()||selectedOption.equals("Select Time")||selectedDate==null){
+                                        Toast.makeText(localContext, "Please Fill all the Fields above", Toast.LENGTH_SHORT).show()
+                                    }else{
+                                        onConfirm(Triple(text,selectedOption,selectedDate.toString()))
+                                        onDismiss()
+                                    }
+                                }
+                                false -> {
+                                    if (text.isEmpty()){
+                                        Toast.makeText(localContext, "Please Fill all the Fields above", Toast.LENGTH_SHORT).show()
+                                    }else{
+                                        onConfirm(Triple(text,"",""))
+                                        onDismiss()
+                                    }
+                                }
+
                             }
+
                         },colors = ButtonColors(containerColor = colorResource(R.color.wedstoreys),
                             contentColor = Color.White, disabledContainerColor = Color.Gray, disabledContentColor = Color.LightGray), modifier = Modifier.padding(5.dp)) {
                             Text("OK")

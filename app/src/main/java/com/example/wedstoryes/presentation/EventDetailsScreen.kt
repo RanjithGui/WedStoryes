@@ -2,7 +2,6 @@ package com.example.wedstoryes.presentation
 
 import android.os.Build
 import android.util.Log
-import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -60,7 +59,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -251,7 +249,7 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
 
         if (openAlertDialog){
             CustomAlertDialog(eventDetailsScreen = true,openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {
-             //   onEvent.invoke(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),it))
+                onEvent.invoke(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),it.first, time = it.second, date = it.third))
         })
         }
     }
@@ -267,6 +265,9 @@ fun SubEventitem(eventDetails: List<SubEventDetails>, onEvent: (GlobalEvent) -> 
         contentPadding = PaddingValues(top = 5.dp, bottom = 5.dp)
     ) {
         val existingDetail = eventDetails.find { it.subEvent == subEvent }
+        item {
+           DateAndTime(existingDetail?.date,existingDetail?.time)
+        }
 
         if (existingDetail?.photographers?.isNotEmpty() ?: false) {
                 itemsIndexed(existingDetail.photographers) { index, photographer ->
@@ -744,5 +745,13 @@ fun CounterButtons(
                 modifier = Modifier.size(16.dp)
             )
         }
+    }
+}
+
+@Composable
+fun DateAndTime(date: String?, time: String?){
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(text = "Date: $date")
+        Text(text = "Time: $time")
     }
 }

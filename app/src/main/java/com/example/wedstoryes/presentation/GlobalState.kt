@@ -9,4 +9,5 @@ data class GlobalState(
     val selectedEventItemIndex: Int = -1,
     val selectedEventItem: EventItem? = null,
     val eventDetails: List<SubEventDetails> = emptyList()
+
 )

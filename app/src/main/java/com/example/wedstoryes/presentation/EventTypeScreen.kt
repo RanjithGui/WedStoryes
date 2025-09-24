@@ -1,7 +1,9 @@
 package com.example.wedstoryes.presentation
 
+import android.os.Build
 import android.widget.Toast
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -49,6 +51,7 @@ import com.example.wedstoryes.customcomposables.GifImage
 import com.example.wedstoryes.data.EventItem
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navController: NavController,onProceed:()-> Unit) {
     val gridState = rememberLazyGridState()
@@ -104,7 +107,7 @@ fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navContro
                                       id = item.id,
                                       title = item.title,
                                       videoUri = item.videoUri,
-                                      eventDetails = item.eventDetails
+                                      eventDetails = item.eventDetails,
                                   )))
                                   deleteIndex = -1
                               }
@@ -134,15 +137,18 @@ fun EventType(viewmodel: GlobalViewmodel,onEvent: (GlobalEvent)-> Unit,navContro
       }
         }
     if (openAlertDialog) {
-       CustomAlertDialog(openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {onEvent.invoke(
+       CustomAlertDialog(eventDetailsScreen = false, openDialog= true, onDismiss = {openAlertDialog=false},
+           onConfirm = {/*onEvent.invoke(
            GlobalEvent.onCustomEvent(EventItem(
                id = it,
                title = it,
                videoUri = R.drawable.customevent,
                eventDetails = emptyList()
            )))
-       selectedIndex =state.events.indexOfFirst { true }
-       onProceed.invoke()})
+       selectedIndex =state.events.indexOfFirst { true }*/
+       onProceed.invoke()
+       }
+       )
     }
 }
 @Composable

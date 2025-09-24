@@ -1,8 +1,10 @@
 package com.example.wedstoryes.presentation
 
+import android.os.Build
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -74,6 +76,7 @@ import com.example.wedstoryes.data.SubEventDetails
 import com.example.wedstoryes.data.Videographers
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController,onContinue:()-> Unit) {
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
@@ -247,8 +250,8 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
 
 
         if (openAlertDialog){
-            CustomAlertDialog(openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {
-                onEvent.invoke(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),it))
+            CustomAlertDialog(eventDetailsScreen = true,openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {
+             //   onEvent.invoke(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),it))
         })
         }
     }

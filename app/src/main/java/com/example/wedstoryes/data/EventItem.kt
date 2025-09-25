@@ -7,5 +7,6 @@ data class EventItem(
     val eventDetails: List<SubEventDetails> = emptyList(),
     val ownerDetails: OwnerDetails?=null,
     val clientDetails: ClientDetails?=null,
-    val termsAndConditions: String? = null
+    val termsAndConditions: String? = null,
+    val termsAndConditionsSaved: Boolean?=false
 )

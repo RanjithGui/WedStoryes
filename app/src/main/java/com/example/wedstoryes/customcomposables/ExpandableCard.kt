@@ -45,8 +45,8 @@ fun ExpandableCard(
     ) {
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(5.dp),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp)
+            shape = RoundedCornerShape(15.dp),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 15.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -80,11 +80,4 @@ fun ExpandableCard(
             }
         }
     }
-
-    if (!isExpanded)
-        Divider(
-            Modifier
-                .fillMaxWidth()
-                .padding(bottom = 3.dp)
-        )
 }

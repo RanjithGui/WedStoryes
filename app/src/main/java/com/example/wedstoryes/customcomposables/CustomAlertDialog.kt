@@ -61,9 +61,15 @@ fun CustomAlertDialog(
     eventDetailsScreen: Boolean,
     openDialog: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (Triple<String, String, String>) -> Unit
+    selectedSubEvent: String? = null,
+    onConfirm: (Triple<String?, String, String>) -> Unit
 ) {
-    var text by remember { mutableStateOf("") }
+    var text: String? by remember { mutableStateOf("") }
+    if (selectedSubEvent.equals("Add Custom Event")){
+        text =""
+    }else{
+        text =selectedSubEvent
+    }
     val localContext = LocalContext.current
     val timeOptions = listOf("Morning", "Afternoon","Evening")
     var expanded by remember { mutableStateOf(false) }
@@ -89,16 +95,18 @@ fun CustomAlertDialog(
                         fontStyle = FontStyle.Italic,
                         fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal)))
                     Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = text,
-                        onValueChange = { text = it },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Done
-                        ),
-                        singleLine = true,
-                        label = { Text("Enter Event name",fontStyle = FontStyle.Italic,
-                            fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal))) }, shape = RoundedCornerShape(15.dp), colors = LocalTextFieldColors.current)
+                    text?.let { it1 ->
+                        OutlinedTextField(
+                            value = it1,
+                            onValueChange = { text = it },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text,
+                                imeAction = ImeAction.Done
+                            ),
+                            singleLine = true,
+                            label = { Text("Enter Event name",fontStyle = FontStyle.Italic,
+                                fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal))) }, shape = RoundedCornerShape(15.dp), colors = LocalTextFieldColors.current)
+                    }
                     Spacer(Modifier.height(16.dp))
                     if (eventDetailsScreen){
                         val today = LocalDate.now()
@@ -165,7 +173,7 @@ fun CustomAlertDialog(
                         Button (onClick = {
                             when(eventDetailsScreen){
                                 true -> {
-                                    if (text.isEmpty()||selectedOption.equals("Select Time")||selectedDate==null){
+                                    if (text?.isEmpty() == true ||selectedOption.equals("Select Time")||selectedDate==null){
                                         Toast.makeText(localContext, "Please Fill all the Fields above", Toast.LENGTH_SHORT).show()
                                     }else{
                                         onConfirm(Triple(text,selectedOption,selectedDate.toString()))
@@ -173,7 +181,7 @@ fun CustomAlertDialog(
                                     }
                                 }
                                 false -> {
-                                    if (text.isEmpty()){
+                                    if (text?.isEmpty() ==true ){
                                         Toast.makeText(localContext, "Please Fill all the Fields above", Toast.LENGTH_SHORT).show()
                                     }else{
                                         onConfirm(Triple(text,"",""))

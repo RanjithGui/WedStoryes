@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -80,7 +81,9 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
     var openAlertDialog by remember { mutableStateOf(false) }
     var selectedSubEvent by remember { mutableStateOf("") }
+    var selectedSubEventLabel by remember { mutableStateOf("") }
     var expandedStates by remember { mutableStateOf(mutableMapOf<String, Boolean>()) }
+    val localContext = LocalContext.current
     val eventDetails = state.events.find { eventItem ->
         eventItem.title == state.selectedEventItem?.title
     }?.eventDetails
@@ -224,15 +227,35 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
                                 )
                             )
                         }
-                        "Add Event" ->{
-                            println("added subevent")
+                        "Add Custom Event" ->{
+                            selectedSubEventLabel = label
+                            openAlertDialog =true
+                        }
+                        "Engagement" ->{
+                            selectedSubEventLabel = label
+                            openAlertDialog =true
+                        }
+                        "Haldi"->{
+                            selectedSubEventLabel = label
+                            openAlertDialog =true
+                        }
+                        "Nalugu"->{
+                            selectedSubEventLabel = label
+                            openAlertDialog =true
+                        }
+                        "Reception"->{
+                            selectedSubEventLabel = label
+                            openAlertDialog =true
+                        }
+                        "Wedding"->{
+                            selectedSubEventLabel = label
                             openAlertDialog =true
                         }
                     }
                 }
                 , eventDetails = eventDetails,modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(16.dp), subEventExpanded = currentSubEventExpanded)
+                    .padding(16.dp), subEventExpanded = currentSubEventExpanded, selectedEvent = state.selectedEventItem?.title)
 
         androidx.compose.material3.Button(
             onClick = {
@@ -249,8 +272,25 @@ fun EventDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Uni
 
         if (openAlertDialog){
             CustomAlertDialog(eventDetailsScreen = true,openDialog= true, onDismiss = {openAlertDialog=false}, onConfirm = {
-                onEvent.invoke(GlobalEvent.onAddSubEvent(state.selectedEventItem?.title ?: "", Photographers(), Videographers(), Addons(),it.first, time = it.second, date = it.third))
-        })
+                val subEvent = it.first
+                val subEventExists = eventDetails?.any {
+                    it.subEvent.equals(subEvent, ignoreCase = true)
+                }
+                if (subEventExists == true){
+                    Toast.makeText(localContext, "SubEvent already exists", Toast.LENGTH_SHORT).show()
+                } else {
+                    onEvent.invoke(
+                        GlobalEvent.onAddSubEvent(
+                            state.selectedEventItem?.title ?: "",
+                            Photographers(),
+                            Videographers(),
+                            Addons(),
+                            it.first,
+                            time = it.second,
+                            date = it.third
+                        )
+                    )
+                } }, selectedSubEvent = selectedSubEventLabel)
         }
     }
 }
@@ -260,7 +300,6 @@ fun SubEventitem(eventDetails: List<SubEventDetails>, onEvent: (GlobalEvent) -> 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 14.dp)
             .padding(bottom = 90.dp),
         contentPadding = PaddingValues(top = 5.dp, bottom = 5.dp)
     ) {
@@ -458,17 +497,17 @@ fun EventDetailsItem(
     var priceText by remember { mutableStateOf("") }
 
 
-    ElevatedCard(modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 10.dp, end = 10.dp, bottom = 5.dp), shape = RoundedCornerShape(5.dp)) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 5.dp), shape = RoundedCornerShape(15.dp),  elevation = CardDefaults.cardElevation(15.dp)) {
         Column (modifier = Modifier.fillMaxSize()){
             Text(text = when(label){
                 "Photo" -> "Photographer"
                 "Video" -> "Videographer"
                 "Addons" -> "Addons"
                 else -> ""
-            }, modifier = Modifier.padding(start = 16.dp,top=16.dp).fillMaxWidth(), fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
-                color = Color.Gray,
-                fontStyle = FontStyle.Italic,
-                fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.SemiBold))
+            }, modifier = Modifier.padding(start = 16.dp,top=16.dp, bottom = 8.dp).fillMaxWidth(), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold,
+                color = Color.Black,
+                fontStyle = FontStyle.Normal,
+                fontFamily = FontFamily.Cursive
             )
             BoxWithConstraints {
                 val buttonWidth = maxWidth - 16.dp
@@ -579,7 +618,7 @@ fun EventDetailsItem(
                 )
 
             }
-            Row (modifier = Modifier.fillMaxWidth().padding(end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.End){
+            Row (modifier = Modifier.fillMaxWidth().padding(end = 26.dp, bottom = 16.dp), horizontalArrangement = Arrangement.End){
                 OutlinedButton(
                     onClick = {
                     // onDelete()
@@ -750,7 +789,7 @@ fun CounterButtons(
 
 @Composable
 fun DateAndTime(date: String?, time: String?){
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(modifier = Modifier.fillMaxWidth().padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = "Date: $date")
         Text(text = "Time: $time")
     }

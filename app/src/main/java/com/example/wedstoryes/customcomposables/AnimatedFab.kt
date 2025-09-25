@@ -53,10 +53,13 @@ fun AnimatedFabWithOptions(
     modifier: Modifier = Modifier,
     onFabOptionClick: (String) -> Unit = {},
     eventDetails: List<SubEventDetails>?,
+    selectedEvent: String?,
     subEventExpanded: Boolean,
 
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val otherOptions = listOf("Add Custom Event", "Engagement","Haldi","Nalugu","Reception","Wedding")
+
 
     Box(modifier = modifier) {
         if (isExpanded) {
@@ -116,14 +119,33 @@ fun AnimatedFabWithOptions(
                         )
                     }
                 } else {
-                    FabOption(
-                        icon = painterResource(R.drawable.camera),
-                        label = "Add Event",
-                        onClick = {
-                            onFabOptionClick("Add Event")
-                            isExpanded = false
+                    Column(
+                        modifier = Modifier.padding(end = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (selectedEvent.equals("Wedding")) {
+                            otherOptions.forEachIndexed { index, label ->
+
+                                FabOption(
+                                    icon = painterResource(R.drawable.camera),
+                                    label = label,
+                                    onClick = {
+                                        onFabOptionClick(label)
+                                        isExpanded = false
+                                    }
+                                )
+                            }
+                        }else{
+                            FabOption(
+                                icon = painterResource(R.drawable.heart_icon),
+                                label = "Add Custom Event",
+                                onClick = {
+                                    onFabOptionClick("Add Custom Event")
+                                    isExpanded = false
+                                }
+                            )
                         }
-                    )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(5.dp))

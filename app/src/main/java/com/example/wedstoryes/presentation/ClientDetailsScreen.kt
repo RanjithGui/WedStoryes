@@ -2,19 +2,26 @@ package com.example.wedstoryes.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.ButtonColors
@@ -23,6 +30,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,13 +56,34 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.wedstoryes.R
+import com.example.wedstoryes.data.ClientDetails
+import com.example.wedstoryes.data.OwnerDetails
 import com.example.wedstoryes.presentation.events.GlobalEvent
 
 
 @Composable
 fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController){
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
+    val events = state.events.find { eventItem -> eventItem.title == state.selectedEventItem?.title } ?: return
+    var ownerDetails by remember { mutableStateOf(OwnerDetails()) }
+    var clientDetails by remember { mutableStateOf(ClientDetails()) }
+    var termsAndConditions by remember { mutableStateOf(" ") }
+    var ownerDetailsSaved by remember { mutableStateOf(false) }
+    var clientDetailsSaved by remember { mutableStateOf(false) }
+    var termsAndConditionsSaved by remember { mutableStateOf(false) }
 
+    if (events.ownerDetails!=null){
+        ownerDetails = events.ownerDetails
+        ownerDetailsSaved = events.ownerDetails.saved == true
+    }
+    if (events.clientDetails!=null){
+        clientDetails = events.clientDetails
+        clientDetailsSaved = events.clientDetails.saved == true
+    }
+    if (events.termsAndConditions!=null){
+        termsAndConditions = events.termsAndConditions
+        termsAndConditionsSaved = events.termsAndConditionsSaved == true
+    }
 
     Column(modifier = Modifier.padding(start = 24.dp, end = 24.dp).fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -86,26 +115,32 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
         Spacer(modifier = Modifier.size(15.dp))
         LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
             item {
-                OwnerDetails()
+                OwnerDetail(details = ownerDetails,
+                    onDetailsChange = { ownerDetails = it }, onEvent = onEvent)
             }
             item {
                 Spacer(modifier = Modifier.size(15.dp))
             }
             item {
-                ClientDetails()
+                ClientDetail(details = clientDetails,
+                    onDetailsChange = { clientDetails = it },onEvent)
             }
             item {
                 Spacer(modifier = Modifier.size(15.dp))
             }
             item {
-                TermsAndConditions()
+                TermsAndConditions( termsText = termsAndConditions,
+                    onTermsChange = { termsAndConditions = it },onEvent)
+            }
+            item {
+                Spacer(modifier = Modifier.size(15.dp))
             }
         }
         androidx.compose.material3.Button(
             onClick = {
 
             }, enabled = true,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp,top=8.dp),
             colors = ButtonColors(containerColor = colorResource(R.color.wedstoreys),
                 contentColor = Color.White, disabledContainerColor = Color.Gray, disabledContentColor = Color.LightGray)
         ) {
@@ -122,12 +157,22 @@ fun isValidMobile(mobile: String): Boolean {
     return mobile.length == 10 && mobile.all { it.isDigit() }
 }
 @Composable
-fun OwnerDetails(){
+fun OwnerDetail( details: OwnerDetails,
+                 onDetailsChange: (OwnerDetails) -> Unit,onEvent: (GlobalEvent) -> Unit){
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var mobileNumber by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var isMobileValid by remember { mutableStateOf(true) }
+    if (details.name!=null){
+        name = details.name
+    }
+    if (details.email!=null){
+        email = details.email
+    }
+    if (details.mobileNumber!=null){
+        mobileNumber = details.mobileNumber
+    }
 
     ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp), elevation = CardDefaults.cardElevation(15.dp)) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -253,17 +298,61 @@ fun OwnerDetails(){
                 fontStyle = FontStyle.Italic
             )
         )
+            Row (modifier = Modifier.fillMaxWidth().padding(start = 26.dp, bottom = 8.dp, top = 8.dp), horizontalArrangement = Arrangement.End){
+                OutlinedButton(
+                    onClick = {
+                        // onDelete()
+
+                    },
+                    enabled =true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedButton(
+                    onClick = {
+
+                    },
+                    enabled =true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
 
     }
     }
 }
 @Composable
-fun ClientDetails(){
+fun ClientDetail(details: ClientDetails,
+                 onDetailsChange: (ClientDetails) -> Unit,onEvent: (GlobalEvent) -> Unit){
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var mobileNumber by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var isMobileValid by remember { mutableStateOf(true) }
+    if (details.name!=null){
+        name = details.name
+    }
+    if (details.email!=null){
+        email = details.email
+    }
+    if (details.mobileNumber!=null){
+        mobileNumber = details.mobileNumber
+    }
 
     ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp), elevation = CardDefaults.cardElevation(15.dp)) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -389,15 +478,52 @@ fun ClientDetails(){
                     fontStyle = FontStyle.Italic
                 )
             )
+            Row (modifier = Modifier.fillMaxWidth().padding(start = 26.dp, bottom = 8.dp, top = 8.dp), horizontalArrangement = Arrangement.End){
+                OutlinedButton(
+                    onClick = {
+                        // onDelete()
+
+                    },
+                    enabled =true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedButton(
+                    onClick = {
+
+                    },
+                    enabled =true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
 
         }
     }
 
 }
 @Composable
-fun TermsAndConditions(){
-    var termsText by remember { mutableStateOf("1. ") }
+fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEvent: (GlobalEvent) -> Unit){
+    var termsTextin by remember { mutableStateOf("") }
     var cursorPosition by remember { mutableStateOf(3) }
+    if (termsText!=null){
+        termsTextin = termsText
+    }
 
     fun handleTextChange(newValue: String) {
         val oldLines = termsText.split("\n")
@@ -414,9 +540,9 @@ fun TermsAndConditions(){
                 val numberedLine = "$nextNumber. $currentLine"
                 val updatedLines = newLines.toMutableList()
                 updatedLines[lastLineIndex] = numberedLine
-                termsText = updatedLines.joinToString("\n")
+                termsTextin = updatedLines.joinToString("\n")
             } else {
-                termsText = newValue
+                termsTextin = newValue
             }
         }
         // Check if user deleted a line
@@ -426,45 +552,85 @@ fun TermsAndConditions(){
                 val content = line.replaceFirst(Regex("^\\d+\\. "), "")
                 "${index + 1}. $content"
             }
-            termsText = renumberedLines.joinToString("\n")
+            termsTextin = renumberedLines.joinToString("\n")
         }
         // Normal text editing within a line
         else {
-            termsText = newValue
+            termsTextin = newValue
         }
     }
 
     val lines = termsText.split("\n")
+    ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp), elevation = CardDefaults.cardElevation(15.dp)) {
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = termsText,
-            onValueChange = { newValue ->
-                handleTextChange(newValue)
-            },
-            label = { Text("Terms and Conditions") },
-            placeholder = {
-                Text("1. Enter your first term and press Enter\n2. New lines will be auto-numbered\n3. TextField expands automatically")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 120.dp), // Minimum height
-            shape = RoundedCornerShape(8.dp),
-            textStyle = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Monospace,
-                color = colorResource(R.color.wedstoreys)
-            ),
-            supportingText = {
-                Text("Lines: ${lines.size} | Characters: ${termsText.length}")
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            OutlinedTextField(
+                value = termsTextin,
+                onValueChange = { newValue ->
+                    handleTextChange(newValue)
+                },
+                label = { Text("Terms and Conditions") },
+                placeholder = {
+                    Text("1. Enter your first term and press Enter\n2. New lines will be auto-numbered")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 120.dp), // Minimum height
+                shape = RoundedCornerShape(8.dp),
+                textStyle = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = colorResource(R.color.wedstoreys)
+                ),
+                supportingText = {
+                    Text("Lines: ${lines.size} | Characters: ${termsText.length}")
+                }
+            )
+            Text(
+                text = "Tip: Press Enter to create a new numbered line",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 26.dp, bottom = 8.dp, top = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        // onDelete()
+
+                    },
+                    enabled = true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedButton(
+                    onClick = {
+
+                    },
+                    enabled = true,
+                    modifier = Modifier.size(22.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Decrease",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
-        )
-        Text(
-            text = "Tip: Press Enter to create a new numbered line",
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp)
-        )
+        }
     }
 
 }

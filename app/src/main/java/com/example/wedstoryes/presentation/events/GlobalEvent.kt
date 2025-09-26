@@ -33,6 +33,12 @@ sealed class GlobalEvent {
         val addons: Addons,
         val subEvent: String?
     ) : GlobalEvent()
-    data class onSaveEvent(val selectedEvent:String,val ownerDetails: OwnerDetails,val clientDetails: ClientDetails,val termsAndConditions: String): GlobalEvent()
+    data class onSaveEvent(
+        val type: String,
+        val selectedEvent: String?,
+        val ownerDetails: OwnerDetails,
+        val clientDetails: ClientDetails,
+        val termsAndConditions: String
+    ): GlobalEvent()
 
 }

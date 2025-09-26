@@ -8,5 +8,6 @@ sealed class Route(val value: String) {
     data object EventDetails : Route("eventdetails")
 
     data object CustomerDetails : Route("customerdetails")
+    data object PdfQuotation : Route("pdfquotation")
 
 }

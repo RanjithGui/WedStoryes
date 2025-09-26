@@ -1,8 +1,10 @@
 package com.example.wedstoryes
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
@@ -14,10 +16,12 @@ import com.example.wedstoryes.presentation.EventDetailsScreen
 import com.example.wedstoryes.presentation.EventType
 import com.example.wedstoryes.presentation.GlobalViewmodel
 import com.example.wedstoryes.presentation.HomeScreen
+import com.example.wedstoryes.presentation.PdfQuotationScreen
 import com.example.wedstoryes.presentation.SplashScreen
 import com.example.wedstoryes.ui.theme.WedStoryesTheme
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().setKeepOnScreenCondition { false }
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -55,8 +59,14 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(Route.CustomerDetails.value){
-                       ClientDetailsScreen(viewmodel, viewmodel::onEvent, navController = nav)
+                       ClientDetailsScreen(viewmodel, viewmodel::onEvent, navController = nav,onContinue = {
+                           nav.navigate(Route.PdfQuotation.value)
+                       })
                     }
+                    composable (Route.PdfQuotation.value){
+                        PdfQuotationScreen()
+                    }
+
                 }
             }
         }

@@ -62,7 +62,7 @@ import com.example.wedstoryes.presentation.events.GlobalEvent
 
 
 @Composable
-fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController){
+fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Unit, navController: NavController,onContinue: () -> Unit){
     val state: GlobalState by viewmodel.state.collectAsStateWithLifecycle()
     val events = state.events.find { eventItem -> eventItem.title == state.selectedEventItem?.title } ?: return
     var ownerDetails by remember { mutableStateOf(OwnerDetails()) }
@@ -71,6 +71,7 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
     var ownerDetailsSaved by remember { mutableStateOf(false) }
     var clientDetailsSaved by remember { mutableStateOf(false) }
     var termsAndConditionsSaved by remember { mutableStateOf(false) }
+    val savedState by remember { mutableStateOf(Triple(false,false,false)) }
 
     if (events.ownerDetails!=null){
         ownerDetails = events.ownerDetails
@@ -115,22 +116,25 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
         Spacer(modifier = Modifier.size(15.dp))
         LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
             item {
-                OwnerDetail(details = ownerDetails,
-                    onDetailsChange = { ownerDetails = it }, onEvent = onEvent)
+                OwnerDetail(
+                    details = ownerDetails,
+                    onDetailsChange = { ownerDetails = it }, onEvent = onEvent, state.selectedEventItem?.title
+                )
             }
             item {
                 Spacer(modifier = Modifier.size(15.dp))
             }
             item {
                 ClientDetail(details = clientDetails,
-                    onDetailsChange = { clientDetails = it },onEvent)
+                    onDetailsChange = { clientDetails = it },onEvent,state.selectedEventItem?.title)
             }
             item {
                 Spacer(modifier = Modifier.size(15.dp))
             }
             item {
                 TermsAndConditions( termsText = termsAndConditions,
-                    onTermsChange = { termsAndConditions = it },onEvent)
+                    onTermsChange = { termsAndConditions = it },onEvent, state.selectedEventItem?.title
+                )
             }
             item {
                 Spacer(modifier = Modifier.size(15.dp))
@@ -138,7 +142,7 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
         }
         androidx.compose.material3.Button(
             onClick = {
-
+             onContinue.invoke()
             }, enabled = true,
             modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp,top=8.dp),
             colors = ButtonColors(containerColor = colorResource(R.color.wedstoreys),
@@ -157,8 +161,11 @@ fun isValidMobile(mobile: String): Boolean {
     return mobile.length == 10 && mobile.all { it.isDigit() }
 }
 @Composable
-fun OwnerDetail( details: OwnerDetails,
-                 onDetailsChange: (OwnerDetails) -> Unit,onEvent: (GlobalEvent) -> Unit){
+fun OwnerDetail(details: OwnerDetails,
+                onDetailsChange: (OwnerDetails) -> Unit,
+                onEvent: (GlobalEvent) -> Unit,
+                selectedEvent: String?
+){
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var mobileNumber by remember { mutableStateOf("") }
@@ -318,7 +325,10 @@ fun OwnerDetail( details: OwnerDetails,
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = {
-
+                        val ownerDetails = OwnerDetails(name = name, email = email, mobileNumber = mobileNumber, saved = true)
+                       onEvent.invoke(GlobalEvent.onSaveEvent(
+                           selectedEvent = selectedEvent,
+                           ownerDetails = ownerDetails, clientDetails = ClientDetails(), termsAndConditions = " ", type = "Owner"))
                     },
                     enabled =true,
                     modifier = Modifier.size(22.dp),
@@ -338,7 +348,7 @@ fun OwnerDetail( details: OwnerDetails,
 }
 @Composable
 fun ClientDetail(details: ClientDetails,
-                 onDetailsChange: (ClientDetails) -> Unit,onEvent: (GlobalEvent) -> Unit){
+                 onDetailsChange: (ClientDetails) -> Unit,onEvent: (GlobalEvent) -> Unit,selectedEvent: String?){
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var mobileNumber by remember { mutableStateOf("") }
@@ -498,7 +508,10 @@ fun ClientDetail(details: ClientDetails,
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = {
-
+                        val clientDetails = ClientDetails(name = name, email = email, mobileNumber = mobileNumber, saved = true)
+                        onEvent.invoke(GlobalEvent.onSaveEvent(
+                            selectedEvent = selectedEvent,
+                            ownerDetails = OwnerDetails(), clientDetails = clientDetails, termsAndConditions = " ", type = "Client"))
                     },
                     enabled =true,
                     modifier = Modifier.size(22.dp),
@@ -518,7 +531,7 @@ fun ClientDetail(details: ClientDetails,
 
 }
 @Composable
-fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEvent: (GlobalEvent) -> Unit){
+fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEvent: (GlobalEvent) -> Unit,selectedEvent: String?){
     var termsTextin by remember { mutableStateOf("") }
     var cursorPosition by remember { mutableStateOf(3) }
     if (termsText!=null){
@@ -616,7 +629,9 @@ fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEve
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = {
-
+                        onEvent.invoke(GlobalEvent.onSaveEvent(
+                            selectedEvent = selectedEvent,
+                            ownerDetails = OwnerDetails(), clientDetails = ClientDetails(), termsAndConditions = termsTextin, type = "Terms"))
                     },
                     enabled = true,
                     modifier = Modifier.size(22.dp),

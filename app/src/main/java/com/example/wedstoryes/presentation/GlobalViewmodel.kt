@@ -3,7 +3,9 @@ package com.example.wedstoryes.presentation
 import com.example.wedstoryes.BaseViewModel
 import com.example.wedstoryes.R
 import com.example.wedstoryes.data.Addons
+import com.example.wedstoryes.data.ClientDetails
 import com.example.wedstoryes.data.EventItem
+import com.example.wedstoryes.data.OwnerDetails
 import com.example.wedstoryes.data.Photographers
 import com.example.wedstoryes.data.SubEventDetails
 import com.example.wedstoryes.data.Videographers
@@ -97,12 +99,67 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
 
                 }
             }
+            is GlobalEvent.onSaveEvent -> {
+                when(event.type){
+                    "Owner" ->{
+                        updateOwnerDetails(event.ownerDetails,event.selectedEvent)
+                    }
+                    "Client" ->{
+                        updateClientDetails(event.clientDetails,event.selectedEvent)
+                    }
+                    "Terms" ->{
+                        updateTermsAndConditions(event.termsAndConditions,event.selectedEvent)
+                    }
+                }
+            }
 
 
 
             else -> {}
         }
     }
+    fun updateOwnerDetails(
+        ownerDetails: OwnerDetails,
+        selectedEvent: String?
+    ) {
+        val updatedEvents = state.value.events.map { eventItem ->
+            if (eventItem.title.equals(selectedEvent, ignoreCase = true)) {
+                eventItem.copy(ownerDetails = ownerDetails)
+            } else {
+                eventItem
+            }
+        }
+       updateState { it.copy(events = updatedEvents) }
+    }
+
+    fun updateClientDetails(
+        ownerDetails: ClientDetails,
+        selectedEvent: String?
+    ) {
+        val updatedEvents = state.value.events.map { eventItem ->
+            if (eventItem.title.equals(selectedEvent, ignoreCase = true)) {
+                eventItem.copy(clientDetails = ownerDetails)
+            } else {
+                eventItem
+            }
+        }
+        updateState { it.copy(events = updatedEvents) }
+    }
+    fun updateTermsAndConditions(
+        termsAndConditions: String,
+        selectedEvent: String?
+    ) {
+        val updatedEvents = state.value.events.map { eventItem ->
+            if (eventItem.title.equals(selectedEvent, ignoreCase = true)) {
+                eventItem.copy(termsAndConditions = termsAndConditions)
+            } else {
+                eventItem
+            }
+        }
+        updateState { it.copy(events = updatedEvents) }
+        println(state.value.events)
+    }
+
     fun updateSelectedEventItem(eventItem: EventItem?) {
         updateState { it.copy(selectedEventItem = eventItem) }
     }

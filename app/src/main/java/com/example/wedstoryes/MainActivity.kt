@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
                        })
                     }
                     composable (Route.PdfQuotation.value){
-                        PdfQuotationScreen(viewmodel = viewmodel)
+                        PdfQuotationScreen(viewmodel = viewmodel, navController = nav)
                     }
 
                 }

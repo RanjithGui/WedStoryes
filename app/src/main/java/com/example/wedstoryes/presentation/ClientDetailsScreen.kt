@@ -1,6 +1,8 @@
 package com.example.wedstoryes.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -70,6 +73,7 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
     var termsAndConditions by remember { mutableStateOf(" ") }
     var ownerDetailsSaved by remember { mutableStateOf(false) }
     var clientDetailsSaved by remember { mutableStateOf(false) }
+    val localContext = LocalContext.current
     var termsAndConditionsSaved by remember { mutableStateOf(false) }
     val savedState by remember { mutableStateOf(Triple(false,false,false)) }
 
@@ -83,7 +87,6 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
     }
     if (events.termsAndConditions!=null){
         termsAndConditions = events.termsAndConditions
-        termsAndConditionsSaved = events.termsAndConditionsSaved == true
     }
 
     Column(modifier = Modifier.padding(start = 24.dp, end = 24.dp).fillMaxSize()) {
@@ -142,7 +145,12 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
         }
         androidx.compose.material3.Button(
             onClick = {
-             onContinue.invoke()
+                if (ownerDetailsSaved && clientDetailsSaved){
+                    onContinue.invoke()
+                }else{
+                    Toast.makeText(localContext,"Please Check All Fields",Toast.LENGTH_SHORT).show()
+                }
+
             }, enabled = true,
             modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp,top=8.dp),
             colors = ButtonColors(containerColor = colorResource(R.color.wedstoreys),
@@ -166,6 +174,7 @@ fun OwnerDetail(details: OwnerDetails,
                 onEvent: (GlobalEvent) -> Unit,
                 selectedEvent: String?
 ){
+    val localContext = LocalContext.current
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var mobileNumber by remember { mutableStateOf("") }
@@ -308,9 +317,9 @@ fun OwnerDetail(details: OwnerDetails,
             Row (modifier = Modifier.fillMaxWidth().padding(start = 26.dp, bottom = 8.dp, top = 8.dp), horizontalArrangement = Arrangement.End){
                 OutlinedButton(
                     onClick = {
-                        // onDelete()
-
-                    },
+                        // Clearing the fields
+                        onEvent.invoke(GlobalEvent.onClearClientdetails(type = "Owner", selectedEvent = selectedEvent))
+                              },
                     enabled =true,
                     modifier = Modifier.size(22.dp),
                     shape = CircleShape,
@@ -319,17 +328,20 @@ fun OwnerDetail(details: OwnerDetails,
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Decrease",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = {
+                        if (!email.isEmpty()||!name.isEmpty()||!mobileNumber.isEmpty()){
                         val ownerDetails = OwnerDetails(name = name, email = email, mobileNumber = mobileNumber, saved = true)
                        onEvent.invoke(GlobalEvent.onSaveEvent(
                            selectedEvent = selectedEvent,
                            ownerDetails = ownerDetails, clientDetails = ClientDetails(), termsAndConditions = " ", type = "Owner"))
-                    },
+                    }else{
+                        Toast.makeText(localContext, "Please fill all the fields", Toast.LENGTH_SHORT).show()
+                    }},
                     enabled =true,
                     modifier = Modifier.size(22.dp),
                     shape = CircleShape,
@@ -338,7 +350,7 @@ fun OwnerDetail(details: OwnerDetails,
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Decrease",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.fillMaxSize().background(color = if (details.saved == true) Color.Green else Color.Transparent)
                     )
                 }
             }
@@ -354,6 +366,7 @@ fun ClientDetail(details: ClientDetails,
     var mobileNumber by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var isMobileValid by remember { mutableStateOf(true) }
+    val localContext = LocalContext.current
     if (details.name!=null){
         name = details.name
     }
@@ -492,7 +505,7 @@ fun ClientDetail(details: ClientDetails,
                 OutlinedButton(
                     onClick = {
                         // onDelete()
-
+                        onEvent.invoke(GlobalEvent.onClearClientdetails(type = "Client", selectedEvent = selectedEvent))
                     },
                     enabled =true,
                     modifier = Modifier.size(22.dp),
@@ -502,17 +515,19 @@ fun ClientDetail(details: ClientDetails,
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Decrease",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = {
+                        if (!email.isEmpty()||!name.isEmpty()||!mobileNumber.isEmpty()){
                         val clientDetails = ClientDetails(name = name, email = email, mobileNumber = mobileNumber, saved = true)
                         onEvent.invoke(GlobalEvent.onSaveEvent(
                             selectedEvent = selectedEvent,
                             ownerDetails = OwnerDetails(), clientDetails = clientDetails, termsAndConditions = " ", type = "Client"))
-                    },
+                    }else{
+                            Toast.makeText(localContext, "Please fill all the fields", Toast.LENGTH_SHORT).show()}},
                     enabled =true,
                     modifier = Modifier.size(22.dp),
                     shape = CircleShape,
@@ -521,7 +536,7 @@ fun ClientDetail(details: ClientDetails,
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Decrease",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.fillMaxSize().background(color = if (details.saved == true) Color.Green else Color.Transparent),
                     )
                 }
             }
@@ -605,7 +620,7 @@ fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEve
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
-            Row(
+           /* Row(
                 modifier = Modifier.fillMaxWidth()
                     .padding(start = 26.dp, bottom = 8.dp, top = 8.dp),
                 horizontalArrangement = Arrangement.End
@@ -613,6 +628,7 @@ fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEve
                 OutlinedButton(
                     onClick = {
                         // onDelete()
+                        onEvent.invoke(GlobalEvent.onClearClientdetails(type = "Terms", selectedEvent = selectedEvent))
 
                     },
                     enabled = true,
@@ -634,7 +650,7 @@ fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEve
                             ownerDetails = OwnerDetails(), clientDetails = ClientDetails(), termsAndConditions = termsTextin, type = "Terms"))
                     },
                     enabled = true,
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(22.dp).background(color = if (ter.saved == true) Color.Green else Color.Transparent),
                     shape = CircleShape,
                     contentPadding = PaddingValues(0.dp)
                 ) {
@@ -644,7 +660,7 @@ fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEve
                         modifier = Modifier.size(16.dp)
                     )
                 }
-            }
+            }*/
         }
     }
 

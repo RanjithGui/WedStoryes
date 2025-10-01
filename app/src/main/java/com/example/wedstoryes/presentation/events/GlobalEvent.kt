@@ -40,5 +40,6 @@ sealed class GlobalEvent {
         val clientDetails: ClientDetails,
         val termsAndConditions: String
     ): GlobalEvent()
+    data class onClearClientdetails(val selectedEvent: String?, val type: String): GlobalEvent()
 
 }

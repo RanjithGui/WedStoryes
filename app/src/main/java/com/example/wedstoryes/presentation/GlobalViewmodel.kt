@@ -112,6 +112,9 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     }
                 }
             }
+            is GlobalEvent.onClearClientdetails -> {
+                clearClientDetails(event.type,event.selectedEvent)
+            }
 
 
 
@@ -581,5 +584,35 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         }
 
    }
+    fun clearClientDetails(dataType: String,selectedEvent: String?){
+        val updatedEvents: List<EventItem> = state.value.events.map { eventItem ->
+            (if (eventItem.title.equals(selectedEvent, ignoreCase = true)) {
+                when(dataType){
+                    "Owner" ->{
+                        eventItem.copy(ownerDetails = OwnerDetails())
+                    }
+
+                    "Client" ->{
+                        eventItem.copy(clientDetails = ClientDetails())
+                    }
+
+                    "Terms" ->{
+                        eventItem.copy(termsAndConditions = "")
+                    }
+
+                    else -> {}
+                }
+
+            } else {
+                eventItem
+            }) as EventItem
+
+        }
+        updateState { it.copy(events = updatedEvents) }
+
+
+
+
+    }
 
 }

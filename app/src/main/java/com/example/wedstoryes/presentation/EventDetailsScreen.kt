@@ -446,6 +446,7 @@ fun EventDetailsItem(
     onSave: (Photographers?, Videographers?, Addons?) -> Unit,
     onDelete: (Photographers?, Videographers?, Addons?) -> Unit
 ) {
+   var isPhotoBookselected by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember {
         mutableStateOf(
@@ -457,8 +458,9 @@ fun EventDetailsItem(
             }
         )
     }
+
     val pvOptions = listOf("Traditional", "Candid")
-    val otherOptions = listOf("Drone", "Albums","Led Screen","Live Streaming","Makeup Artist","Decorations","Invitations")
+    val otherOptions = listOf("Drone", "Albums","Led Screen","Live Streaming","Makeup Artist","Decorations","Invitations","PhotoBook")
     var rawPrice by remember(label, photographer, videographer, addons) {
         mutableStateOf(
             when(label){
@@ -480,6 +482,7 @@ fun EventDetailsItem(
             }
         )
     }
+    var description by remember { mutableStateOf("") }
 
     // Initialize count state with existing data
     var count by remember(label, photographer, videographer, addons) {
@@ -495,6 +498,7 @@ fun EventDetailsItem(
 
 
     var priceText by remember { mutableStateOf("") }
+    var sheets by remember { mutableStateOf("") }
 
 
     ElevatedCard(modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 5.dp), shape = RoundedCornerShape(15.dp),  elevation = CardDefaults.cardElevation(15.dp)) {
@@ -557,6 +561,9 @@ fun EventDetailsItem(
                                 onClick = {
                                     selectedOption = option
                                     expanded = false
+                                    isPhotoBookselected = if (selectedOption.equals("PhotoBook")){
+                                        true
+                                    }else false
                                 }
                             )
                         }
@@ -564,7 +571,7 @@ fun EventDetailsItem(
                 }
             }
 
-            Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 10.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                 OutlinedTextField(
                     modifier = Modifier.weight(5f).padding(vertical = 4.dp),
                     shape = RoundedCornerShape(15.dp),
@@ -618,7 +625,48 @@ fun EventDetailsItem(
                 )
 
             }
-            Row (modifier = Modifier.fillMaxWidth().padding(end = 26.dp, bottom = 16.dp), horizontalArrangement = Arrangement.End){
+          if (isPhotoBookselected){
+              OutlinedTextField(
+                  modifier = Modifier.fillMaxWidth().padding(16.dp, end = 16.dp),
+                  shape = RoundedCornerShape(15.dp),
+                  value = sheets,
+                  onValueChange = { newValue ->
+                      sheets = newValue
+                  },
+                  label = { Text("Sheets") },
+                  placeholder = { Text("sheets of photobook") },
+                  singleLine = true,
+                  keyboardOptions = KeyboardOptions(
+                      keyboardType = KeyboardType.Number,
+                      imeAction = ImeAction.Done
+                  ),
+                  textStyle = TextStyle(
+                      fontSize = 14.sp,
+                      fontWeight = FontWeight.SemiBold,
+                      color = colorResource(R.color.wedstoreys),
+                      fontStyle = FontStyle.Italic
+                  )
+              )
+              OutlinedTextField(
+                  modifier = Modifier.fillMaxWidth().padding(16.dp, end = 16.dp),
+                  shape = RoundedCornerShape(15.dp),
+                  value = description,
+                  onValueChange = { newValue ->
+                      description = newValue
+                  },
+                  label = { Text("Description") },
+                  placeholder = { Text("Enter Description") },
+                  singleLine = false,
+                  textStyle = TextStyle(
+                      fontSize = 14.sp,
+                      fontWeight = FontWeight.SemiBold,
+                      color = colorResource(R.color.wedstoreys),
+                      fontStyle = FontStyle.Italic
+                  )
+              )
+          }
+
+            Row (modifier = Modifier.fillMaxWidth().padding(end = 26.dp, bottom = 16.dp, top = 16.dp), horizontalArrangement = Arrangement.End){
                 OutlinedButton(
                     onClick = {
                     // onDelete()

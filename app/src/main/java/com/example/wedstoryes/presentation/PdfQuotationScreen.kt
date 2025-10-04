@@ -20,16 +20,40 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -466,6 +490,9 @@ fun showNotification(context: Context, file: File) {
 
 // PDF Generation Function
 fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) -> Unit) {
+    val eventDetails = state.events.find {
+        it.title == state.selectedEventItem?.title
+    }
     try {
         val pdfDocument = PdfDocument()
         val pageWidth = 595
@@ -655,6 +682,20 @@ fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) 
         }
         yPosition = tableStartY + 30
         // Event rows data
+        val events = eventDetails?.eventDetails
+        val eventsToDraw = events?.map { subEventDetail ->
+            arrayOf(
+                subEventDetail.subEvent ?: "N/A",
+                subEventDetail.photographers?.joinToString("\n") { "${it.nop ?: 1} ${it.type ?: "Candid"}" } ?: "",
+                subEventDetail.videographers?.joinToString("\n") { "${it.nop ?: 1} ${it.type ?: "Candid"}" } ?: "",
+                subEventDetail.date ?: "N/A",
+                subEventDetail.time ?: "N/A",
+                subEventDetail.addons?.joinToString("\n") { (it.type + "  x ${it.count}") } ?: "",
+                // Price: Using "0" as a placeholder, if SubEventDetails has a price field, use it here.
+               "0"
+            )
+        }
+
         val eventss = listOf(
             arrayOf("Engagement", "1 Candid\n1 Traditional", "1 Candid\n1 Traditional", "3-Aug-25", "Morning", "Drone\nDrone\nDrone\nDrone\nDrone", "100000"),
             arrayOf("Haldi", "1 Candid\n1 Traditional", "1 Candid\n1 Traditional", "22-Sep-25", "Morning", "Drone\nDrone\nDrone\nDrone\nDrone", "100000"),
@@ -671,59 +712,61 @@ fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) 
         }
 
         // Draw event rows with dynamic height
-        for (eventData in eventss) {
-            val rowHeight = calculateRowHeight(eventData)
-            checkNewPage(rowHeight)
+        if (eventsToDraw != null) {
+            for (eventData in eventsToDraw) {
+                val rowHeight = calculateRowHeight(eventData)
+                checkNewPage(rowHeight)
 
-            // Draw row border, extending to the right margin
-            canvas.drawRect(
-                margin.toFloat(),
-                yPosition.toFloat(),
-                (pageWidth - margin).toFloat(),
-                (yPosition + rowHeight).toFloat(),
-                borderPaint
-            )
+                // Draw row border, extending to the right margin
+                canvas.drawRect(
+                    margin.toFloat(),
+                    yPosition.toFloat(),
+                    (pageWidth - margin).toFloat(),
+                    (yPosition + rowHeight).toFloat(),
+                    borderPaint
+                )
 
-            // Draw cell content with proper vertical centering
-            for (i in eventData.indices) {
-                val lines = eventData[i].split("\n")
-                val lineCount = lines.size
-                val lineHeight = 13
+                // Draw cell content with proper vertical centering
+                for (i in eventData.indices) {
+                    val lines = eventData[i].split("\n")
+                    val lineCount = lines.size
+                    val lineHeight = 13
 
-                // Calculate starting Y to center the text block vertically
-                val totalTextHeight = lineCount * lineHeight
-                var lineY = yPosition + (rowHeight - totalTextHeight) / 2 + 10 // Center vertically
+                    // Calculate starting Y to center the text block vertically
+                    val totalTextHeight = lineCount * lineHeight
+                    var lineY = yPosition + (rowHeight - totalTextHeight) / 2 + 10 // Center vertically
 
-                for (line in lines) {
-                    canvas.drawText(
-                        line,
-                        (eventColStartX[i] + actualEventColWidths[i] / 2).toFloat(),
-                        lineY.toFloat(),
-                        Paint().apply {
-                            textSize = when (i) {
-                                1, 2 -> 8f // Photographer/Videographer columns
-                                5 -> 8f    // Addons column (smaller text for more lines)
-                                else -> 9f
+                    for (line in lines) {
+                        canvas.drawText(
+                            line,
+                            (eventColStartX[i] + actualEventColWidths[i] / 2).toFloat(),
+                            lineY.toFloat(),
+                            Paint().apply {
+                                textSize = when (i) {
+                                    1, 2 -> 8f // Photographer/Videographer columns
+                                    5 -> 8f    // Addons column (smaller text for more lines)
+                                    else -> 9f
+                                }
+                                textAlign = Paint.Align.CENTER
                             }
-                            textAlign = Paint.Align.CENTER
-                        }
-                    )
-                    lineY += lineHeight // Line spacing
+                        )
+                        lineY += lineHeight // Line spacing
+                    }
+
+                    // Draw vertical dividers for each column within the row
+                    if (i > 0) {
+                        canvas.drawLine(
+                            eventColStartX[i].toFloat(),
+                            yPosition.toFloat(),
+                            eventColStartX[i].toFloat(),
+                            (yPosition + rowHeight).toFloat(),
+                            borderPaint
+                        )
+                    }
                 }
 
-                // Draw vertical dividers for each column within the row
-                if (i > 0) {
-                    canvas.drawLine(
-                        eventColStartX[i].toFloat(),
-                        yPosition.toFloat(),
-                        eventColStartX[i].toFloat(),
-                        (yPosition + rowHeight).toFloat(),
-                        borderPaint
-                    )
-                }
+                yPosition += rowHeight
             }
-
-            yPosition += rowHeight
         }
 
         /*// Event rows data

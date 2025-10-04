@@ -391,7 +391,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
         val currentDetails = state.value.events
         val existingDetails = currentDetails.find { it.title == eventName } ?: return // Exit if event not found
         val updatedDetails: List<SubEventDetails> = existingDetails.eventDetails.plus(
-            SubEventDetails(subEvent, time, date, emptyList(),emptyList(),emptyList())
+            SubEventDetails(subEvent, emptyList(), emptyList(), date,time,emptyList())
         )
 
         val updatedEvents = state.value.events.map { eventItem ->

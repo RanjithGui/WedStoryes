@@ -528,26 +528,19 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             return
         }
 
-        // Find the specific SubEventDetails within that EventItem
         val subEventDetailToUpdate = eventToUpdate.eventDetails.find { it.subEvent == subEvent }
         if (subEventDetailToUpdate == null) {
             println("SubEvent '$subEvent' not found in event '$eventName' for updating photographer.")
             return
         }
 
-        // Get the current list of photographers for that sub-event
         val currentAddonsList = subEventDetailToUpdate.addons
 
         if (currentAddonsList != null && index >= 0 && index < currentAddonsList.size) {
-            // Create a mutable copy of the photographers list
             val mutableAddons = currentAddonsList.toMutableList()
-            // Replace the item at the specified index
             mutableAddons[index] = newAddon
 
-            // Create updated SubEventDetails with the modified photographers list
             val updatedSubEventDetails = subEventDetailToUpdate.copy(addons = mutableAddons)
-
-            // Create updated eventDetails list for the specific event
             val updatedEventDetailsListForEvent = eventToUpdate.eventDetails.map { detail ->
                 if (detail.subEvent == subEvent) {
                     updatedSubEventDetails
@@ -555,11 +548,7 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
                     detail
                 }
             }
-
-            // Create the updated EventItem
             val updatedEventItem = eventToUpdate.copy(eventDetails = updatedEventDetailsListForEvent)
-
-            // Update the main events list in the state
             val updatedEventsList = state.value.events.map { eventItem ->
                 if (eventItem.title.equals(eventName, ignoreCase = true)) {
                     updatedEventItem
@@ -571,10 +560,6 @@ class GlobalViewmodel : BaseViewModel<GlobalEvent, GlobalState>() {
             updateState { currentState ->
                 currentState.copy(
                     events = updatedEventsList
-                    // If state.value.eventDetails is a flat list of all sub-event details,
-                    // you'll need to rebuild it here based on the updatedEventsList.
-                    // For example:
-                    // eventDetails = updatedEventsList.flatMap { it.eventDetails }
                 )
             }
             println("Successfully updated photographer at index $index in subEvent '$subEvent' of event '$eventName'")

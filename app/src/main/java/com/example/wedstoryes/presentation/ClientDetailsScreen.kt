@@ -134,6 +134,12 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
             item {
                 Spacer(modifier = Modifier.size(15.dp))
             }
+            item{
+                EventTotalprice()
+            }
+            item {
+                Spacer(modifier = Modifier.size(15.dp))
+            }
             item {
                 TermsAndConditions( termsText = termsAndConditions,
                     onTermsChange = { termsAndConditions = it },onEvent, state.selectedEventItem?.title
@@ -161,6 +167,71 @@ fun ClientDetailsScreen(viewmodel: GlobalViewmodel, onEvent: (GlobalEvent) -> Un
     }
 
 }
+
+@Composable
+fun EventTotalprice() {
+    var totalPrice by remember { mutableStateOf("") }
+    var totaldiscount by remember { mutableStateOf("") }
+    ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp), elevation = CardDefaults.cardElevation(15.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(
+                text = "Price Details",
+                modifier = Modifier
+                    .fillMaxWidth(),
+                fontSize = 25.sp,
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(R.color.wedstoreys),
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily(Font(R.font.italianno_regular, FontWeight.Normal))
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(15.dp),
+                value = totalPrice,
+                onValueChange = { newValue ->
+                    totalPrice = newValue
+                },
+                label = { Text("Total Amount") },
+                placeholder = { Text("Enter Amount") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                ),
+                textStyle = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorResource(R.color.wedstoreys),
+                    fontStyle = FontStyle.Italic
+                )
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(15.dp),
+                value = totaldiscount,
+                onValueChange = { newValue ->
+                   totaldiscount =newValue
+                },
+                label = { Text("Discount") },
+                placeholder = { Text("Enter discount amount") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                textStyle = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorResource(R.color.wedstoreys),
+                    fontStyle = FontStyle.Italic
+                )
+            )
+        }
+    }
+}
+
 fun isValidEmail(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
@@ -620,47 +691,6 @@ fun TermsAndConditions( termsText: String, onTermsChange: (String) -> Unit,onEve
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
-           /* Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 26.dp, bottom = 8.dp, top = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        // onDelete()
-                        onEvent.invoke(GlobalEvent.onClearClientdetails(type = "Terms", selectedEvent = selectedEvent))
-
-                    },
-                    enabled = true,
-                    modifier = Modifier.size(22.dp),
-                    shape = CircleShape,
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Decrease",
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                OutlinedButton(
-                    onClick = {
-                        onEvent.invoke(GlobalEvent.onSaveEvent(
-                            selectedEvent = selectedEvent,
-                            ownerDetails = OwnerDetails(), clientDetails = ClientDetails(), termsAndConditions = termsTextin, type = "Terms"))
-                    },
-                    enabled = true,
-                    modifier = Modifier.size(22.dp).background(color = if (ter.saved == true) Color.Green else Color.Transparent),
-                    shape = CircleShape,
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Decrease",
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }*/
         }
     }
 

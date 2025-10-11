@@ -692,7 +692,9 @@ fun EventDetailsItem(
                             addons.copy(
                                 type = selectedOption,
                                 count=count,
-                               price = priceText
+                               price = priceText,
+                                details = description,
+                                sheets=sheets
                             )
                         }else{
                             null
@@ -733,7 +735,9 @@ fun EventDetailsItem(
                             addons.copy(
                                 type = selectedOption,
                                 count=count,
-                               price = priceText, details = ""
+                               price = priceText,
+                                details = description,
+                                sheets=sheets
                             )
                         } else null
 

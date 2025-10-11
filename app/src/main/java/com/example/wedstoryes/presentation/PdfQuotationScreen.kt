@@ -8,6 +8,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
@@ -16,6 +18,7 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
@@ -74,15 +78,19 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.wedstoryes.R
+import com.example.wedstoryes.data.Addons
 import com.example.wedstoryes.data.ClientDetails
 import com.example.wedstoryes.data.OwnerDetails
 import java.io.File
 import java.io.FileOutputStream
+import java.time.LocalDate
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PdfQuotationScreen(
     onDownloadPdf: () -> Unit = {},viewmodel: GlobalViewmodel,navController: NavController
@@ -140,6 +148,7 @@ fun PdfQuotationScreen(
             }
         )
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     fun checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Android 13+ - Check notification permission
@@ -489,7 +498,8 @@ fun showNotification(context: Context, file: File) {
 
 
 // PDF Generation Function
-fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) -> Unit) {
+@RequiresApi(Build.VERSION_CODES.O)
+fun generateAndSavePDF(context: Context, state: GlobalState, onComplete: (File?) -> Unit) {
     val eventDetails = state.events.find {
         it.title == state.selectedEventItem?.title
     }
@@ -559,15 +569,34 @@ fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) 
         val rightAlignedNormalPaint = Paint(normalPaint).apply {
             textAlign = Paint.Align.RIGHT
         }
+
         val fromDetailsX = (pageWidth - margin).toFloat()
-        canvas.drawText("Date: 23-Jul-25", fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
-        yPosition += 50
+        val date = LocalDate.now()
+
+
+
+
+        // 2. Draw the Bitmap onto the main canvas
+
+
+        canvas.drawText("Date: ${date}", fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
+        val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.logo)
+
+        // Resize to exactly 349 x 149 pixels
+        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 150, 70, true)
+
+        // Draw on top-left with small margin (e.g., 20 points)
+        val left = 20f
+        val top = 20f
+
+        canvas.drawBitmap(resizedBitmap, left, top, null)
+        yPosition += resizedBitmap.height + 20
         canvas.drawText("Quotation", pageWidth / 2f, yPosition.toFloat(), titlePaint)
         yPosition += 40
 
 
-    // Draw To/From Section
-    checkNewPage(120)
+         // Draw To/From Section
+        checkNewPage(120)
 
         // "To:" section (remains left-aligned)
         val toX = margin.toFloat()
@@ -591,23 +620,23 @@ fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) 
         yPosition += 25 // Move down for the details
 
         // Client details (left side)
-        canvas.drawText("Komali", toX, yPosition.toFloat(), normalPaint) // normalPaint should have Align.LEFT
+        canvas.drawText(eventDetails?.clientDetails?.name.toString(), toX, yPosition.toFloat(), normalPaint) // normalPaint should have Align.LEFT
 
         // Company details (right side, right-aligned)
-        canvas.drawText("The wedstoryes", fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
+        canvas.drawText("The wedstoryes (${eventDetails?.ownerDetails?.name.toString()})", fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
         yPosition += 20
 
-        canvas.drawText("rajeshputti21@gmail.com", toX, yPosition.toFloat(), normalPaint)
-        canvas.drawText("thewedstoryes2019@gmail.com", fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
+        canvas.drawText(eventDetails?.clientDetails?.email.toString(), toX, yPosition.toFloat(), normalPaint)
+        canvas.drawText(eventDetails?.ownerDetails?.email.toString(), fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
         yPosition += 20
 
-        canvas.drawText("+91 80088 92188", toX, yPosition.toFloat(), normalPaint)
-        canvas.drawText("9030709090", fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
+        canvas.drawText(eventDetails?.clientDetails?.mobileNumber.toString(), toX, yPosition.toFloat(), normalPaint)
+        canvas.drawText(eventDetails?.ownerDetails?.mobileNumber.toString(), fromDetailsX, yPosition.toFloat(), rightAlignedNormalPaint)
         yPosition += 50 // Space after the To/From block
 
     // Thank you message
     checkNewPage(60)
-    canvas.drawText("Dear Komali,", margin.toFloat(), yPosition.toFloat(), normalPaint)
+    canvas.drawText("Dear ${eventDetails?.clientDetails?.name.toString()}},", margin.toFloat(), yPosition.toFloat(), normalPaint)
     yPosition += 25
     canvas.drawText("Thank you for choosing The wedstoryes for your big day.", margin.toFloat(), yPosition.toFloat(), normalPaint)
     yPosition += 20
@@ -683,16 +712,23 @@ fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) 
         yPosition = tableStartY + 30
         // Event rows data
         val events = eventDetails?.eventDetails
+        var photobookAddon = Addons()
         val eventsToDraw = events?.map { subEventDetail ->
+            val foundPhotobook = subEventDetail.addons?.find { it.type.equals("Photobook", ignoreCase = true) }
+            if (foundPhotobook != null) {
+                photobookAddon = foundPhotobook
+            }
+
+            val addonsForTable = subEventDetail.addons?.filter { !it.type.equals("Photobook", ignoreCase = true)}
             arrayOf(
                 subEventDetail.subEvent ?: "N/A",
-                subEventDetail.photographers?.joinToString("\n") { "${it.nop ?: 1} ${it.type ?: "Candid"}" } ?: "",
-                subEventDetail.videographers?.joinToString("\n") { "${it.nop ?: 1} ${it.type ?: "Candid"}" } ?: "",
+                subEventDetail.photographers?.joinToString("\n") { "${it.nop ?: 1} ${it.type ?: "Candid"}" } ?: "N/A",
+                subEventDetail.videographers?.joinToString("\n") { "${it.nop ?: 1} ${it.type ?: "Candid"}" } ?: "N/A",
                 subEventDetail.date ?: "N/A",
                 subEventDetail.time ?: "N/A",
-                subEventDetail.addons?.joinToString("\n") { (it.type + "  x ${it.count}") } ?: "",
+                addonsForTable?.joinToString("\n") { (it.type + "  x ${it.count}") } ?: "N/A",
                 // Price: Using "0" as a placeholder, if SubEventDetails has a price field, use it here.
-               "0"
+               "N/A"
             )
         }
 
@@ -852,17 +888,19 @@ fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) 
         checkNewPage(photobookDataRowHeight)
         canvas.drawRect(margin.toFloat(), yPosition.toFloat(), (pageWidth - margin).toFloat(), (yPosition + photobookDataRowHeight).toFloat(), borderPaint)
 
-        val photobookData = arrayOf("Premium\nAlbums", "3", "80 Silky matte sheets", "235000")
+        val photobookData = if (photobookAddon!=null) arrayOf("${photobookAddon.count}x ${photobookAddon.type}", photobookAddon.sheets, photobookAddon.details, photobookAddon.price) else arrayOf("N/A", "N/A", "N/A", "N/A")
         for (i in photobookData.indices) {
-            val lines = photobookData[i].split("\n")
-            var lineY = yPosition + if (lines.size == 1) (photobookDataRowHeight / 2 + 5) else 18 // Adjust based on lines
+            val lines = photobookData[i]?.split("\n")
+            var lineY = yPosition + if (lines?.size == 1) (photobookDataRowHeight / 2 + 5) else 18 // Adjust based on lines
 
-            for (line in lines) {
-                canvas.drawText(line, (photobookStartX[i] + photobookColWidths[i] / 2).toFloat(), lineY.toFloat(), Paint().apply {
-                    textSize = 10f
-                    textAlign = Paint.Align.CENTER
-                })
-                lineY += 15 // Line spacing
+            if (lines != null) {
+                for (line in lines) {
+                    canvas.drawText(line, (photobookStartX[i] + photobookColWidths[i] / 2).toFloat(), lineY.toFloat(), Paint().apply {
+                        textSize = 10f
+                        textAlign = Paint.Align.CENTER
+                    })
+                    lineY += 15 // Line spacing
+                }
             }
 
             // Draw vertical dividers for photobook data
@@ -875,7 +913,7 @@ fun generateAndSavePDF(context: Context, state: GlobalState,onComplete: (File?) 
         yPosition +=30
         // Amount Summary
         checkNewPage(100)
-        val summaryStartX = pageWidth - margin - 200
+        val summaryStartX = pageWidth - 240
         canvas.drawText("Amount", summaryStartX.toFloat(), yPosition.toFloat(), headerPaint)
         yPosition += 30
 

@@ -8,5 +8,9 @@ data class EventItem(
     val ownerDetails: OwnerDetails?=null,
     val clientDetails: ClientDetails?=null,
     val termsAndConditions: String? = null,
-    val termsAndConditionsSaved: Boolean?=false
+    val termsAndConditionsSaved: Boolean?=false,
+    val totalPrice: String="",
+    val totalDiscount: String=""
 )
+
+
